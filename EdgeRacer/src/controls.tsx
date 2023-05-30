@@ -1,15 +1,21 @@
+import { StartingGoal } from "./StartingGoal";
 import { Building } from "./building";
 import { Eraser } from "./eraser";
+import { FinishGoal } from "./finishGoal";
 
 type Mode = 'buildWall' | 'eraseWall' | 'addStartLine' | 'addFinishLine';
 export class Controls {
     controls: NodeListOf<HTMLElement>;
     bc: Building;
     ec: Eraser;
-    constructor(bc: Building, ec: Eraser) {
+    sgc: StartingGoal;
+    fgc: FinishGoal;
+    constructor(bc: Building, ec: Eraser, sgc: StartingGoal, fgc: FinishGoal) {
         this.controls = document.getElementsByName('controls');
         this.bc = bc;
         this.ec = ec;
+        this.sgc = sgc;
+        this.fgc = fgc;
 
         for (let i = 0; i < this.controls.length; i++) {
             (this.controls[i] as HTMLInputElement).checked = false;
@@ -18,6 +24,8 @@ export class Controls {
 
         document.getElementById('destroyButton')?.addEventListener('click', () => {
             this.bc.destroyAll();
+            this.sgc.destroyAll();
+            this.fgc.destroyAll();
         });
     }
 
@@ -36,7 +44,6 @@ export class Controls {
 
         // enable only the selected mode
         this.enableMode(selectedControl as Mode);
-
     }
 
     disableAllModes() {
@@ -45,7 +52,8 @@ export class Controls {
     enableMode(selectedControl: Mode) {
         this.bc.setBuildingMode(false)
         this.ec.setEraseMode(false);
-
+        this.sgc.setGoalMode(false);
+        this.fgc.setGoalMode(false);
 
         switch (selectedControl) {
             case 'buildWall':
@@ -54,8 +62,13 @@ export class Controls {
             case 'eraseWall':
                 this.ec.setEraseMode(true);
                 break;
+            case 'addStartLine':
+                this.sgc.setGoalMode(true);
+                break;
+            case 'addFinishLine':
+                this.fgc.setGoalMode(true);
+                break;    
             default:
-            // code block
         }
 
     }

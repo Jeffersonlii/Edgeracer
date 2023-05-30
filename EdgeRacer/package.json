@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "serve": "parcel index.html"
+  },
   "devDependencies": {
     "typescript": "^5.0.4"
   },

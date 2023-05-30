@@ -1,11 +1,11 @@
-import { Graphics, Container, DisplayObject } from 'pixi.js';
+import { Graphics, Container, DisplayObject, Application } from 'pixi.js';
 import { wallWidth } from './building';
 
 export class Eraser {
-    private app: any;
+    private app: Application<HTMLCanvasElement>;
     eraseMode: boolean;
 
-    constructor(app) {
+    constructor(app : Application<HTMLCanvasElement>) {
         this.app = app;
     }
 
@@ -14,7 +14,6 @@ export class Eraser {
 
         if (toErase) {
             const walls = this.getWalls();
-            console.log(walls)
 
             walls.forEach(this.attachListenersToWall.bind(this));
         } else {
@@ -29,7 +28,7 @@ export class Eraser {
     getWalls(): Graphics[] {
         return this.app.stage.children
             .filter(child => child.name === 'wall')
-            .map(cont => cont.children[0]);
+            .map(cont => cont.children?.[0] as Graphics);
     }
 
     attachListenersToWall(wall: Graphics) {

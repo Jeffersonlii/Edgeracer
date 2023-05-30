@@ -1,8 +1,8 @@
-import { Graphics, Container } from 'pixi.js';
+import { Graphics, Container, Application } from 'pixi.js';
 
 export const wallWidth = 10;
 export class Building {
-    private app: any;
+    private app: Application<HTMLCanvasElement>;
 
     // startPoint !== null means we have already captured the first click, and are ready for the second
     private startPoint: { x: number, y: number } | null;
@@ -10,7 +10,7 @@ export class Building {
     private editingUICont: Container;
     private startDot: Graphics;
 
-    constructor(app) {
+    constructor(app : Application<HTMLCanvasElement>) {
         this.app = app;
         this.startPoint = null;
         this.buildingMode = false;
