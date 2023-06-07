@@ -3,7 +3,7 @@ import { wallWidth } from './building';
 
 export class Eraser {
     private app: Application<HTMLCanvasElement>;
-    eraseMode: boolean;
+    eraseMode: boolean = false;
 
     constructor(app : Application<HTMLCanvasElement>) {
         this.app = app;
@@ -27,8 +27,7 @@ export class Eraser {
 
     getWalls(): Graphics[] {
         return this.app.stage.children
-            .filter(child => child.name === 'wall')
-            .map(cont => cont.children?.[0] as Graphics);
+            .filter(child => child.name === 'wall') as Graphics[];
     }
 
     attachListenersToWall(wall: Graphics) {
@@ -55,9 +54,8 @@ export class Eraser {
     }
 
     erase(wall: Graphics) {
-        let wallcont = wall.parent
-        this.app.stage.removeChild(wallcont);
-        wallcont.destroy();
+        this.app.stage.removeChild(wall);
+        wall.destroy();
     }
 
 }

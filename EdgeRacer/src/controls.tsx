@@ -1,7 +1,7 @@
-import { StartingGoal } from "./StartingGoal";
 import { Building } from "./building";
 import { Eraser } from "./eraser";
 import { FinishGoal } from "./finishGoal";
+import { StartingGoal } from "./startingGoal";
 
 type Mode = 'buildWall' | 'eraseWall' | 'addStartLine' | 'addFinishLine';
 export class Controls {
@@ -21,12 +21,6 @@ export class Controls {
             (this.controls[i] as HTMLInputElement).checked = false;
             this.controls[i].addEventListener('change', this.handleControlChange.bind(this));
         }
-
-        document.getElementById('destroyButton')?.addEventListener('click', () => {
-            this.bc.destroyAll();
-            this.sgc.destroyAll();
-            this.fgc.destroyAll();
-        });
     }
 
     handleControlChange() {

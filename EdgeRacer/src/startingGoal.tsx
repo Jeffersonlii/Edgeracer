@@ -21,7 +21,7 @@ const style = new TextStyle({
 
 export class StartingGoal {
     private app: Application<HTMLCanvasElement>;
-    goalsModes: boolean;
+    goalsModes: boolean = false;
     startGraphic: Text;
 
     constructor(app : Application<HTMLCanvasElement>) {
@@ -32,7 +32,7 @@ export class StartingGoal {
         app.view.addEventListener('mouseup', this.handleMc.bind(this));
     }
 
-    private handleMc(event){
+    private handleMc(event: { offsetX: any; offsetY: any; }){
         if (!this.goalsModes) return;
         const { offsetX, offsetY } = event;
 
@@ -49,6 +49,16 @@ export class StartingGoal {
     destroyAll() {
         let st = this.app.stage.getChildByName('start');
         if(st) this.app.stage.removeChild(st);
+    }
+
+    exists(){
+        return !! this.app.stage.getChildByName('start');
+    }
+
+    getPosition(){
+        return {
+            x: this.startGraphic.x + this.startGraphic.width / 2,
+            y: this.startGraphic.y + this.startGraphic.height / 2};
     }
 
 }

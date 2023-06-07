@@ -21,7 +21,7 @@ const style = new TextStyle({
 
 export class FinishGoal {
     private app: Application<HTMLCanvasElement>;
-    goalsModes: boolean;
+    goalsModes: boolean = false;
     finishGraphic: Text;
 
     constructor(app : Application<HTMLCanvasElement>) {
@@ -32,7 +32,7 @@ export class FinishGoal {
         app.view.addEventListener('mouseup', this.handleMc.bind(this));
     }
 
-    private handleMc(event){
+    private handleMc(event: any){
         if (!this.goalsModes) return;
         const { offsetX, offsetY } = event;
 

@@ -1,6 +1,12 @@
 import { Graphics, Container, Application } from 'pixi.js';
 
 export const wallWidth = 10;
+// wrapper class for a walls
+class Wall extends Graphics {
+    endX!: number;
+    endY!: number;
+}
+
 export class Building {
     private app: Application<HTMLCanvasElement>;
 
@@ -10,7 +16,7 @@ export class Building {
     private editingUICont: Container;
     private startDot: Graphics;
 
-    constructor(app : Application<HTMLCanvasElement>) {
+    constructor(app: Application<HTMLCanvasElement>) {
         this.app = app;
         this.startPoint = null;
         this.buildingMode = false;
@@ -23,10 +29,11 @@ export class Building {
 
         app.view.addEventListener('mousedown', this.handleMd.bind(this));
         app.view.addEventListener('mouseup', this.handleMu.bind(this));
+        let wall = new Wall();
 
     }
 
-    private handleMd(event){
+    private handleMd(event: any) {
         if (!this.buildingMode) return;
 
         const { offsetX, offsetY } = event;
@@ -42,7 +49,7 @@ export class Building {
 
         this.editingUICont.addChild(this.startDot);
     }
-    private handleMu(event){
+    private handleMu(event: any) {
         if (!this.buildingMode || !this.startPoint) return;
 
 
@@ -51,21 +58,21 @@ export class Building {
         let endPoint = { x: offsetX, y: offsetY };
 
         // Draw the rectangle
-        let cont = new Container();
-        cont.name = 'wall'
-        let wall = new Graphics();
-        cont.addChild(wall);
-        this.app.stage.addChild(cont);
+        let wall = new Wall();
+        wall.name = 'wall';
+        this.app.stage.addChild(wall);
 
         // create wall definitions
         let wallLength = Math.sqrt(
             Math.pow(endPoint.x - this.startPoint.x, 2) + Math.pow(endPoint.y - this.startPoint.y, 2));
         wall.beginFill('grey', 50);
-        wall.drawRoundedRect(-wallWidth/2, -wallWidth/2, wallLength + wallWidth, wallWidth, 5);
+        wall.drawRoundedRect(-wallWidth / 2, -wallWidth / 2, wallLength + wallWidth, wallWidth, 5);
 
         // define container location
-        cont.x = this.startPoint.x;
-        cont.y = this.startPoint.y;
+        wall.x = this.startPoint.x;
+        wall.y = this.startPoint.y;
+        wall.endX = endPoint.x;
+        wall.endY = endPoint.y;
 
         // find angle for rectangle
         wall.angle = Math.atan2(
@@ -98,3 +105,4 @@ export class Building {
         });
     }
 }
+

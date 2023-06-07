@@ -3,7 +3,7 @@
     "serve": "parcel index.html"
   },
   "devDependencies": {
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.3"
   },
   "dependencies": {
     "pixi.js": "^7.2.4"

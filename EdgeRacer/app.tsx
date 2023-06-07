@@ -2,8 +2,9 @@ import { Application, Assets, Sprite, Graphics } from 'pixi.js';
 import { Building } from './src/building';
 import { Controls } from './src/controls';
 import { Eraser } from './src/eraser';
-import { StartingGoal } from './src/StartingGoal';
 import { FinishGoal } from './src/finishGoal';
+import { Agent } from './src/model/agent';
+import { StartingGoal } from './src/startingGoal';
 
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
@@ -15,9 +16,9 @@ function buildapp() {
     });
 
     appContainer.appendChild(app.view);
-    
+
     //load in assets
-    
+
     // building walls
     const buildingComponent = new Building(app);
 
@@ -33,6 +34,31 @@ function buildapp() {
         eraseComponent,
         sgoalsComponent,
         fgoalsComponent);
+
+    // add subs 
+    (() => {
+        document.getElementById('destroyButton')?.addEventListener('click', () => {
+            buildingComponent.destroyAll();
+            sgoalsComponent.destroyAll();
+            fgoalsComponent.destroyAll();
+        });
+
+        document.getElementById('trainButton')?.addEventListener('click', () => {
+            // add an Agent to begin training
+
+            if(!sgoalsComponent.exists()){
+                alert('Please Place a Start Position First!');
+                return;
+            }
+
+            let player = new Agent(app, sgoalsComponent.getPosition(), null); 
+            
+            player.spawnAndTrain();
+        });
+    })();
 }
+
+
+
 
 buildapp();
