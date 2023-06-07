@@ -2,7 +2,7 @@ import { Graphics, Container, Application } from 'pixi.js';
 
 export const wallWidth = 10;
 // wrapper class for a walls
-class Wall extends Graphics {
+export class Wall extends Graphics {
     endX!: number;
     endY!: number;
 }

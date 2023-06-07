@@ -1,8 +1,8 @@
 export type Position = {
-    x: number,
-    y: number
-  };
-export function intersectPoint(startPos1 : Position, endPos1 : Position, startPos2: Position, endPos2: Position) {
+  x: number,
+  y: number
+};
+export function intersectionOfSegments(startPos1: Position, endPos1: Position, startPos2: Position, endPos2: Position) {
   const x1 = startPos1.x;
   const y1 = startPos1.y;
   const x2 = endPos1.x;
@@ -12,14 +12,28 @@ export function intersectPoint(startPos1 : Position, endPos1 : Position, startPo
   const x4 = endPos2.x;
   const y4 = endPos2.y;
 
-  const denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  var a_dx = x2 - x1;
+  var a_dy = y2 - y1;
+  var b_dx = x4 - x3;
+  var b_dy = y4 - y3;
+  var s = (-a_dy * (x1 - x3) + a_dx * (y1 - y3)) / (-b_dx * a_dy + a_dx * b_dy);
+  var t = (+b_dx * (y1 - y3) - b_dy * (x1 - x3)) / (-b_dx * a_dy + a_dx * b_dy);
+  return (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+    ? { x: x1 + t * a_dx, y: y1 + t * a_dy }
+    : null;
+}
 
-  if (denominator === 0) {
-    return null; // Lines are parallel or coincident
-  }
+export function calcVelocity(initialPosition: Position, finalPosition: Position) {
+  const time = 1;
 
-  const intersectX = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denominator;
-  const intersectY = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denominator;
+  const velocityX = (finalPosition.x - initialPosition.x) / time;
+  const velocityY = (finalPosition.y - initialPosition.y) / time;
 
-  return { x: intersectX, y: intersectY };
+  return Math.sqrt(velocityX ** 2 + velocityY ** 2);
+}
+
+export function calcDist(point1: Position, point2: Position) {
+  return Math.sqrt(
+    Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2)
+  );
 }

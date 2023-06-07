@@ -46,12 +46,15 @@ function buildapp() {
         document.getElementById('trainButton')?.addEventListener('click', () => {
             // add an Agent to begin training
 
-            if(!sgoalsComponent.exists()){
-                alert('Please Place a Start Position First!');
+            if(!(sgoalsComponent.exists() && fgoalsComponent.exists())){
+                alert('Please Place a Start and Finish Position First!');
                 return;
             }
 
-            let player = new Agent(app, sgoalsComponent.getPosition(), null); 
+            let player = new Agent(app, {
+                startPosition: sgoalsComponent.getPosition(),
+                goalPosition: fgoalsComponent.getPosition(),
+             }, null); 
             
             player.spawnAndTrain();
         });

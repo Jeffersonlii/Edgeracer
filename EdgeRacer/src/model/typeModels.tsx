@@ -3,9 +3,7 @@ export interface State {
     frontDelta: number;
     leftfrontDelta: number;
     rightfrontDelta: number;
-    leftDelta: number;
-    rightDelta: number;
     goalDelta: number;
+    angle: number; // angle of car in degrees 
     velocity: number;
-    acceleration: number;
 }

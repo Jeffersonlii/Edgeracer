@@ -51,4 +51,13 @@ export class FinishGoal {
         if(st) this.app.stage.removeChild(st);
     }
 
+    exists(){
+        return !! this.app.stage.getChildByName('finish');
+    }
+
+    getPosition(){
+        return {
+            x: this.finishGraphic.x + this.finishGraphic.width / 2,
+            y: this.finishGraphic.y + this.finishGraphic.height / 2};
+    }
 }
