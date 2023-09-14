@@ -41,9 +41,6 @@ export class Controls {
         this.enableMode(selectedControl as Mode);
     }
 
-    disableAllModes() {
-    }
-
     enableMode(selectedControl: Mode) {
         this.bc.setBuildingMode(false)
         this.ec.setEraseMode(false);

@@ -1,13 +1,15 @@
 import { State } from "pixi.js";
 import * as tf from '@tensorflow/tfjs';
+// Deep Q Learning
 
-export class NN{
+//https://www.analyticsvidhya.com/blog/2019/04/introduction-deep-q-learning-python/
+export class DQL{
     
     model: tf.Sequential;
 
-    constructor(nnOptions: any){
+    constructor(nnOptions: any = {}){
         this.model = tf.sequential();
-        // todo define the model 
+        // todo define the main and  
     }
 
     private transformInput(input : State){

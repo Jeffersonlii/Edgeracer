@@ -61,5 +61,4 @@ export class StartingGoal {
             x: this.startGraphic.x + this.startGraphic.width / 2,
             y: this.startGraphic.y + this.startGraphic.height / 2};
     }
-
 }

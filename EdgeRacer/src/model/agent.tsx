@@ -2,7 +2,7 @@ import { Application, Container, Graphics, IPointData, Point } from "pixi.js";
 import { Actions, State } from "./typeModels";
 import { Position, calcDist, calcVelocity, intersectionOfSegments } from "../mathHelpers";
 import { Wall } from "../building";
-import { NN } from "./buildModel";
+import { DQL } from "./DQL";
 
 interface CarTelemetry {
     position: Position;
@@ -25,7 +25,7 @@ export class Agent {
     private carCont: Container;
     private car: Graphics;
     private app: Application<HTMLCanvasElement>;
-    private nn: NN;
+    private dql: DQL;
 
     // position of agent at last frame (for accel / velocity calculations)
     private prePosition: Position;
@@ -36,11 +36,12 @@ export class Agent {
     // goal position
     private goalPosition: Position;
 
-    constructor(app: Application<HTMLCanvasElement>, gameRules: {
-        startPosition: Position;
-        goalPosition: Position;
-    }, nn: NN) {
-        this.nn = nn;
+    constructor(app: Application<HTMLCanvasElement>,
+        gameRules: {
+            startPosition: Position;
+            goalPosition: Position;
+        }, dql: DQL) {
+        this.dql = dql;
         this.app = app;
         this.prePosition = gameRules.startPosition;
         this.position = gameRules.startPosition;
@@ -82,7 +83,7 @@ export class Agent {
             let startingPosition: Position = { ...this.position }
 
             // get current NN state 
-            let beforeState = this.getCurNNState(this.app, {
+            let inputState = this.getCurNNState(this.app, {
                 position: this.position,
                 prePosition: this.prePosition,
                 angle: this.carCont.angle,
@@ -94,8 +95,8 @@ export class Agent {
             }, this.goalPosition);
 
             // get action from NN
-            
-            let action: Actions = this.nn.getAction(beforeState);
+
+            // let action: Actions = this.nn.getAction(beforeState);
 
             // perform action => get new state AND REWARD
 
@@ -228,13 +229,4 @@ export class Agent {
             velocity: calcVelocity(carTelemetry.prePosition, carTelemetry.position),
         } as State;
     }
-
-    private performAction(action: Actions){
-        // todo...
-    }
-    // perform action => get new state
-
-    // report new state to NN 
-
-    // endAgent function 
 }

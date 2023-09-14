@@ -5,7 +5,7 @@ import { Eraser } from './src/eraser';
 import { FinishGoal } from './src/finishGoal';
 import { Agent } from './src/model/agent';
 import { StartingGoal } from './src/startingGoal'; 
-import { NN } from './src/model/buildModel';
+import { DQL } from './src/model/DQL';
 
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
@@ -52,12 +52,12 @@ function buildapp() {
                 return;
             }
 
-            // let player = new Agent(app, {
-            //     startPosition: sgoalsComponent.getPosition(),
-            //     goalPosition: fgoalsComponent.getPosition(),
-            //  }, new NN()); 
+            let player = new Agent(app, {
+                startPosition: sgoalsComponent.getPosition(),
+                goalPosition: fgoalsComponent.getPosition(),
+             }, new DQL()); 
             
-            // player.spawnAndTrain();
+            player.spawnAndTrain();
         });
     })();
 }
