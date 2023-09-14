@@ -3,19 +3,15 @@ import { wallWidth } from './building';
 
 export class Eraser {
     private app: Application<HTMLCanvasElement>;
-    eraseMode: boolean = false;
-
     constructor(app : Application<HTMLCanvasElement>) {
         this.app = app;
     }
 
     setEraseMode(toErase: boolean) {
-        this.eraseMode = toErase;
-
         if (toErase) {
             const walls = this.getWalls();
 
-            walls.forEach(this.attachListenersToWall.bind(this));
+            walls.forEach(this.attachListenersToWall);
         } else {
             const walls = this.getWalls();
             walls.forEach(wall => {
@@ -30,7 +26,7 @@ export class Eraser {
             .filter(child => child.name === 'wall') as Graphics[];
     }
 
-    attachListenersToWall(wall: Graphics) {
+    attachListenersToWall = (wall: Graphics) => {
         wall.eventMode = 'static';
         const border = new Graphics();
         wall.addChild(border);

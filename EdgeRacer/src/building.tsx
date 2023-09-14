@@ -12,29 +12,22 @@ export class Building {
 
     // startPoint !== null means we have already captured the first click, and are ready for the second
     private startPoint: { x: number, y: number } | null;
-    buildingMode: boolean;
     private editingUICont: Container;
     private startDot: Graphics;
 
     constructor(app: Application<HTMLCanvasElement>) {
         this.app = app;
         this.startPoint = null;
-        this.buildingMode = false;
 
         this.editingUICont = new Container();
         this.editingUICont.x = 0;
         this.editingUICont.y = 0;
         this.app.stage.addChild(this.editingUICont);
         this.startDot = new Graphics();
-
-        app.view.addEventListener('mousedown', this.handleMd.bind(this));
-        app.view.addEventListener('mouseup', this.handleMu.bind(this));
-        let wall = new Wall();
-
     }
 
-    private handleMd(event: any) {
-        if (!this.buildingMode) return;
+    handleMd = (event: any) => {
+        // if (!this.buildingMode) return;
 
         const { offsetX, offsetY } = event;
 
@@ -49,15 +42,14 @@ export class Building {
 
         this.editingUICont.addChild(this.startDot);
     }
-    private handleMu(event: any) {
-        if (!this.buildingMode || !this.startPoint) return;
-
+    handleMu = (event: any) => {
+        if (!this.startPoint) return;
 
         const { offsetX, offsetY } = event;
 
         let endPoint = { x: offsetX, y: offsetY };
 
-        // Draw the rectangle
+        // Draw the rectangle / wall line
         let wall = new Wall();
         wall.name = 'wall';
         this.app.stage.addChild(wall);
@@ -79,24 +71,26 @@ export class Building {
             endPoint.y - this.startPoint.y,
             endPoint.x - this.startPoint.x) * (180 / Math.PI);
 
-        this.resetBuild();
+        this.resetBuildUI();
     }
 
-    resetBuild() {
+    resetBuildUI() {
         this.startPoint = null;
         this.editingUICont.visible = false;
     }
 
-    draw() {
-        // if(startPoint)
-    }
-
     setBuildingMode(toBuild: boolean) {
-        this.buildingMode = toBuild;
+        if (toBuild){
+            this.app.view.addEventListener('mousedown', this.handleMd);
+            this.app.view.addEventListener('mouseup', this.handleMu);
+        }else{
+            this.app.view.removeEventListener('mousedown', this.handleMd);
+            this.app.view.removeEventListener('mouseup', this.handleMu);
+        }
     }
 
     destroyAll() {
-        this.resetBuild()
+        this.resetBuildUI()
         const walls = this.app.stage.children.filter(child => child.name === 'wall');
 
         walls.forEach(wall => {

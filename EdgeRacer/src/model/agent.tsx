@@ -1,7 +1,8 @@
 import { Application, Container, Graphics, IPointData, Point } from "pixi.js";
-import { State } from "./typeModels";
+import { Actions, State } from "./typeModels";
 import { Position, calcDist, calcVelocity, intersectionOfSegments } from "../mathHelpers";
 import { Wall } from "../building";
+import { NN } from "./buildModel";
 
 interface CarTelemetry {
     position: Position;
@@ -19,10 +20,12 @@ const maxEyeDist = 10000;
 export class Agent {
 
     // cur time alive
-    private currentState: State;
+    // private currentState: State;
+
     private carCont: Container;
     private car: Graphics;
     private app: Application<HTMLCanvasElement>;
+    private nn: NN;
 
     // position of agent at last frame (for accel / velocity calculations)
     private prePosition: Position;
@@ -36,7 +39,8 @@ export class Agent {
     constructor(app: Application<HTMLCanvasElement>, gameRules: {
         startPosition: Position;
         goalPosition: Position;
-    }, lastNN: any) {
+    }, nn: NN) {
+        this.nn = nn;
         this.app = app;
         this.prePosition = gameRules.startPosition;
         this.position = gameRules.startPosition;
@@ -72,7 +76,6 @@ export class Agent {
                     deb.destroy();
                 });
 
-
             this.carCont.angle += 1;
 
             // save the starting position of the car
@@ -90,10 +93,13 @@ export class Agent {
                 }
             }, this.goalPosition);
 
-            console.log(beforeState);
-            // get action from NN 
+            // get action from NN
+            
+            let action: Actions = this.nn.getAction(beforeState);
 
             // perform action => get new state AND REWARD
+
+
 
             // update NN with reward 
 
@@ -143,7 +149,7 @@ export class Agent {
     private paintDebug(x: number, y: number) {
         let debug = new Graphics()
         debug.clear()
-        debug.beginFill('pink', 100);
+        debug.beginFill('red', 100);
         debug.drawEllipse(x, y, 5, 5);
         debug.name = 'debug'
 
@@ -223,8 +229,9 @@ export class Agent {
         } as State;
     }
 
-    // get action
-
+    private performAction(action: Actions){
+        // todo...
+    }
     // perform action => get new state
 
     // report new state to NN 

@@ -4,6 +4,7 @@ import { FinishGoal } from "./finishGoal";
 import { StartingGoal } from "./startingGoal";
 
 type Mode = 'buildWall' | 'eraseWall' | 'addStartLine' | 'addFinishLine';
+//todo change over to factory DP ? 
 export class Controls {
     controls: NodeListOf<HTMLElement>;
     bc: Building;
@@ -19,11 +20,11 @@ export class Controls {
 
         for (let i = 0; i < this.controls.length; i++) {
             (this.controls[i] as HTMLInputElement).checked = false;
-            this.controls[i].addEventListener('change', this.handleControlChange.bind(this));
+            this.controls[i].addEventListener('change', this.handleControlChange);
         }
     }
 
-    handleControlChange() {
+    handleControlChange = () => {
 
         // find what has been checked
         let selectedControl = "";
