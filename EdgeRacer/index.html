@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>App</title>
   <link rel="stylesheet" href="styles/main.css">
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
 </head>
+
 <body>
   <div id="controls">
     <div>
-        <input type="radio" id="buildWall" name="controls" value="buildWall">
-        <label for="buildWall">Build Wall</label>
-      </div>
-      <div>
-        <input type="radio" id="eraseWall" name="controls" value="eraseWall">
-        <label for="eraseWall">Erase Wall</label>
-      </div>
-      <div>
-        <input type="radio" id="addStartLine" name="controls" value="addStartLine">
-        <label for="addStartLine">Add Start Line</label>
-      </div>
-      <div>
-        <input type="radio" id="addFinishLine" name="controls" value="addFinishLine">
-        <label for="addFinishLine">Add Finish Line</label>
-      </div>
-      <button id="trainButton">Train!</button>
-      <button id="destroyButton">Clear</button>
+      <input type="radio" id="buildWall" name="controls" value="buildWall">
+      <label for="buildWall">Build Wall</label>
+    </div>
+    <div>
+      <input type="radio" id="eraseWall" name="controls" value="eraseWall">
+      <label for="eraseWall">Erase Wall</label>
+    </div>
+    <div>
+      <input type="radio" id="addStartLine" name="controls" value="addStartLine">
+      <label for="addStartLine">Add Start Line</label>
+    </div>
+    <div>
+      <input type="radio" id="addFinishLine" name="controls" value="addFinishLine">
+      <label for="addFinishLine">Add Finish Line</label>
+    </div>
+    <button id="trainButton">Train!</button>
+    <button id="destroyButton">Clear</button>
   </div>
   <div id="canvas-space"></div>
-  <script src="app.tsx"></script>
+  <script src="app.tsx" type="module"></script>
 </body>
+
 </html>

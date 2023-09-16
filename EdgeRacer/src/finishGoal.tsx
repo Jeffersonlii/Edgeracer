@@ -19,7 +19,7 @@ const style = new TextStyle({
     lineJoin: 'round',
 });
 
-export class FinishGoal {
+export class FinishGoal implements ControlInterface{
     private app: Application<HTMLCanvasElement>;
     finishGraphic: Text;
 
@@ -30,6 +30,7 @@ export class FinishGoal {
 
         app.view.addEventListener('mouseup', this.handleMc);
     }
+    htmlFormValue: string = 'addFinishLine';
 
     private handleMc = (event: any) => {
         const { offsetX, offsetY } = event;
@@ -40,8 +41,8 @@ export class FinishGoal {
         this.app.stage.addChild(this.finishGraphic);
     }
 
-    setGoalMode(toGoal: boolean) {
-        if(toGoal){
+    setActive(isActive: boolean) {
+        if(isActive){
             this.app.view.addEventListener('mouseup', this.handleMc);
         }else{
             this.app.view.removeEventListener('mouseup', this.handleMc);

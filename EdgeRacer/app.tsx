@@ -18,30 +18,21 @@ function buildapp() {
 
     appContainer.appendChild(app.view);
 
-    //load in assets
-
-    // building walls
-    const buildingComponent = new Building(app);
-
-    // erasing walls
-    const eraseComponent = new Eraser(app);
-
-    // adding goals
+    //load in control components 
     const sgoalsComponent = new StartingGoal(app);
     const fgoalsComponent = new FinishGoal(app);
 
-    new Controls(
-        buildingComponent,
-        eraseComponent,
+    const contrComponents: ControlInterface[]  = [
+        new Building(app),
+        new Eraser(app),
         sgoalsComponent,
-        fgoalsComponent);
+        fgoalsComponent];
+    new Controls(contrComponents);
 
     // add subs 
     (() => {
         document.getElementById('destroyButton')?.addEventListener('click', () => {
-            buildingComponent.destroyAll();
-            sgoalsComponent.destroyAll();
-            fgoalsComponent.destroyAll();
+            contrComponents.forEach((c)=>c.destroyAll());
         });
 
         document.getElementById('trainButton')?.addEventListener('click', () => {

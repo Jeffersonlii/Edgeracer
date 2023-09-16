@@ -1,67 +1,31 @@
-import { Building } from "./building";
-import { Eraser } from "./eraser";
-import { FinishGoal } from "./finishGoal";
-import { StartingGoal } from "./startingGoal";
-
-type Mode = 'buildWall' | 'eraseWall' | 'addStartLine' | 'addFinishLine';
-//todo change over to factory DP ? 
 export class Controls {
-    controls: NodeListOf<HTMLElement>;
-    bc: Building;
-    ec: Eraser;
-    sgc: StartingGoal;
-    fgc: FinishGoal;
-    constructor(bc: Building, ec: Eraser, sgc: StartingGoal, fgc: FinishGoal) {
-        this.controls = document.getElementsByName('controls');
-        this.bc = bc;
-        this.ec = ec;
-        this.sgc = sgc;
-        this.fgc = fgc;
+    components : ControlInterface[];
 
-        for (let i = 0; i < this.controls.length; i++) {
-            (this.controls[i] as HTMLInputElement).checked = false;
-            this.controls[i].addEventListener('change', this.handleControlChange);
+    constructor(components : ControlInterface[]) {
+        this.components = components;
+        let htmlcontrols = document.getElementsByName('controls');
+
+        for (let i = 0; i < htmlcontrols.length; i++) {
+            (htmlcontrols[i] as HTMLInputElement).checked = false;
+            htmlcontrols[i].addEventListener('change', () => this.handleControlChange(htmlcontrols));
         }
     }
 
-    handleControlChange = () => {
-
+    handleControlChange = (htmlcontrols: NodeListOf<HTMLElement>) => {
         // find what has been checked
         let selectedControl = "";
-        for (let i = 0; i < this.controls.length; i++) {
-            if ((this.controls[i] as HTMLInputElement).checked) {
-                selectedControl = (this.controls[i] as HTMLInputElement).value;
+        for (let i = 0; i < htmlcontrols.length; i++) {
+            if ((htmlcontrols[i] as HTMLInputElement).checked) {
+                selectedControl = (htmlcontrols[i] as HTMLInputElement).value;
                 // Perform actions based on the selected control option
                 console.log('Selected Control:', selectedControl);
                 break;
             }
         }
 
-        // enable only the selected mode
-        this.enableMode(selectedControl as Mode);
-    }
-
-    enableMode(selectedControl: Mode) {
-        this.bc.setBuildingMode(false)
-        this.ec.setEraseMode(false);
-        this.sgc.setGoalMode(false);
-        this.fgc.setGoalMode(false);
-
-        switch (selectedControl) {
-            case 'buildWall':
-                this.bc.setBuildingMode(true);
-                break;
-            case 'eraseWall':
-                this.ec.setEraseMode(true);
-                break;
-            case 'addStartLine':
-                this.sgc.setGoalMode(true);
-                break;
-            case 'addFinishLine':
-                this.fgc.setGoalMode(true);
-                break;    
-            default:
-        }
-
+        // set the selected control to be active, all others are set negative
+        this.components.forEach((c)=>{
+            c.setActive(c.htmlFormValue === selectedControl)
+        })
     }
 }

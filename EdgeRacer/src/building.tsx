@@ -7,7 +7,7 @@ export class Wall extends Graphics {
     endY!: number;
 }
 
-export class Building {
+export class Building implements ControlInterface{
     private app: Application<HTMLCanvasElement>;
 
     // startPoint !== null means we have already captured the first click, and are ready for the second
@@ -25,6 +25,7 @@ export class Building {
         this.app.stage.addChild(this.editingUICont);
         this.startDot = new Graphics();
     }
+    htmlFormValue: string = 'buildWall';
 
     handleMd = (event: any) => {
         // if (!this.buildingMode) return;
@@ -79,8 +80,8 @@ export class Building {
         this.editingUICont.visible = false;
     }
 
-    setBuildingMode(toBuild: boolean) {
-        if (toBuild){
+    setActive(isActive: boolean) {
+        if (isActive){
             this.app.view.addEventListener('mousedown', this.handleMd);
             this.app.view.addEventListener('mouseup', this.handleMu);
         }else{
