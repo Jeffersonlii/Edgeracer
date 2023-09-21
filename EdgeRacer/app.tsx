@@ -44,6 +44,15 @@ function buildapp() {
 
     // add subs 
     (() => {
+        window.addEventListener('resize', (e)=>{
+            let a = document.getElementById('canvas-space') 
+            app.renderer.resize(a?.clientWidth as number, a?.clientHeight as number);
+
+            // recreate border walls when user resizes 
+            buildingComponent.destroyBorderWalls();
+            buildingComponent.createBorderWalls();
+        });
+
         document.getElementById('destroyButton')?.addEventListener('click', () => {
             
             // uncheck all control radio buttons
