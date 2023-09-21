@@ -7,6 +7,10 @@ export class Wall extends Graphics {
     endX!: number;
     endY!: number;
 }
+interface WallCoordinate{
+    startPos: Position;
+    endPos: Position;
+}
 const wallname = 'wall123';
 export class Building implements ControlInterface{
     private app: Application<HTMLCanvasElement>;
@@ -101,10 +105,7 @@ export class Building implements ControlInterface{
         });
     }
 
-    getAllWallPos(): {
-        startPos: Position;
-        endPos: Position;
-    }[]{
+    getAllWallPos(): WallCoordinate[]{
         let wallsList = this.app.stage.children.filter(child => child.name === wallname) as Wall[]
         return wallsList.map(
             (wall: Wall) => ({

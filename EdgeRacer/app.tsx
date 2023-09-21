@@ -3,7 +3,6 @@ import { Building } from './src/building';
 import { Controls } from './src/controls';
 import { Eraser } from './src/eraser';
 import { FinishGoal } from './src/finishGoal';
-import { Agent } from './src/model/agent';
 import { StartingGoal } from './src/startingGoal'; 
 import { DQL } from './src/model/DQL';
 import { GameEnvironment } from './src/model/GameEnvironment';

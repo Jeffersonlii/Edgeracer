@@ -1,12 +1,11 @@
 import { Application, Container, Graphics, Point } from "pixi.js";
 import { Action, QState, EnvState } from "./envModels";
-import { Building, Wall } from "../building";
+import { Building, Wall, WallCoordinate } from "../building";
 import { Position, calcDist, iPointDataToPosition, intersectionOfSegments } from "../mathHelpers";
 import { StartingGoal } from "../startingGoal";
 import { FinishGoal } from "../finishGoal";
 
 const carContName = 'carcont123';
-
 const maxEyeDist = 10000;
 
 // objects for finding the eye ends of the car
@@ -19,14 +18,11 @@ export class GameEnvironment {
     private bc: Building
     private sgc: StartingGoal
     private fgc: FinishGoal
-    private wallsCords: {
-        startPos: Position;
-        endPos: Position;
-    }[] = []
+    private wallsCords: WallCoordinate[] = []
 
     // main globals we use to manipulate and record the state of the game
-    private currentState!: EnvState;
-    private goalPosition!: Position;
+    private currentState: EnvState | undefined;
+    private goalPosition: Position | undefined;
     private carCont: Container | undefined;
 
     constructor(
@@ -40,6 +36,8 @@ export class GameEnvironment {
         this.fgc = fgoalsComponent;
     }   
 
+    // reset the environment, initialize all global variables like the walls and game state
+    // create the car assets 
     reset(): QState {
         // clean up cars
         const cars = this.app.stage.children.filter(child => child.name === carContName);
@@ -58,7 +56,7 @@ export class GameEnvironment {
 
         // init current state
         this.currentState = {
-            ...this.getWallDeltasToAgent(startingPosition),
+            ...this.getWallDeltasToAgent(this.carCont, this.wallsCords),
             goalDelta: calcDist(startingPosition, this.goalPosition),
             position: startingPosition,
             angle: 0,
@@ -75,11 +73,9 @@ export class GameEnvironment {
         state: QState,
         reward: number
     } {
-        // todo better way to handle this
-        if (!this.carCont) {
-            throw new Error('Car Container is undefined');
+        if (!this.carCont || !this.currentState || ! this.goalPosition) {
+            throw new Error('Please Call env.reset() to instantiated game');
         }
-
         // get reward
         let reward = this.getReward(this.currentState, action);
 
@@ -93,7 +89,7 @@ export class GameEnvironment {
         // ----- update to new state
         this.currentState = {
             ...this.currentState,
-            ...this.getWallDeltasToAgent(),
+            ...this.getWallDeltasToAgent(this.carCont, this.wallsCords),
             angle: this.carCont.angle,
         }
 
@@ -104,11 +100,11 @@ export class GameEnvironment {
         };
     }
 
-    getReward(state: QState, action: Action): number {
+    private getReward(state: QState, action: Action): number {
         return 0;
     }
 
-    private getWallDeltasToAgent(position?: Position) {
+    private getWallDeltasToAgent(carCont: Container, wallsCords: WallCoordinate[] ) {
         //remove all debugs
         this.app.stage.children.filter(child => child.name === 'debug')
         .forEach(deb => {
@@ -116,23 +112,20 @@ export class GameEnvironment {
             deb.destroy();
         });
 
-        if (!this.carCont) {
-            throw new Error('Car Container is undefined');
-        }
+
         let eyesEnds = {
-            left: iPointDataToPosition(this.carCont.toGlobal(leftEnd)),
-            center: iPointDataToPosition(this.carCont.toGlobal(centerEnd)),
-            right: iPointDataToPosition(this.carCont.toGlobal(rightEnd)),
+            left: iPointDataToPosition(carCont.toGlobal(leftEnd)),
+            center: iPointDataToPosition(carCont.toGlobal(centerEnd)),
+            right: iPointDataToPosition(carCont.toGlobal(rightEnd)),
         }
 
         // find the closest walls to our eyes
         let closestFront = maxEyeDist;
         let closestLeft = maxEyeDist;
         let closestRight = maxEyeDist;
-        let carPos = position ?? this.currentState.position;
-        console.log(this.wallsCords)
-        for (let i = 0; i < this.wallsCords.length; i++) {
-            let wall = this.wallsCords[i]
+        let carPos = {x: carCont.x, y: carCont.y};
+        for (let i = 0; i < wallsCords.length; i++) {
+            let wall = wallsCords[i]
 
             // test front 
             let frontCollisionPoint = intersectionOfSegments(carPos, eyesEnds.center,
