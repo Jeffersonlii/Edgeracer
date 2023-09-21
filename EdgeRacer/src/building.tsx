@@ -7,16 +7,17 @@ export class Wall extends Graphics {
     endX!: number;
     endY!: number;
 }
-export interface WallCoordinate{
+export interface WallCoordinate {
     startPos: Position;
     endPos: Position;
 }
 const wallname = 'wall123';
-export class Building implements ControlInterface{
+const borderWallName = 'borderwall123';
+export class Building implements ControlInterface {
     private app: Application<HTMLCanvasElement>;
 
     // startPoint !== null means we have already captured the first click, and are ready for the second
-    private startPoint: { x: number, y: number } | null;
+    private startPoint: Position | null;
     private editingUICont: Container;
     private startDot: Graphics;
 
@@ -32,7 +33,7 @@ export class Building implements ControlInterface{
     }
     htmlFormValue: string = 'buildWall';
 
-    handleMd = (event: any) => {
+    private handleMd = (event: any) => {
         // if (!this.buildingMode) return;
 
         const { offsetX, offsetY } = event;
@@ -48,56 +49,56 @@ export class Building implements ControlInterface{
 
         this.editingUICont.addChild(this.startDot);
     }
-    handleMu = (event: any) => {
+    private handleMu = (event: any) => {
         if (!this.startPoint) return;
 
         const { offsetX, offsetY } = event;
 
         let endPoint = { x: offsetX, y: offsetY };
 
+        this.buildWall(this.startPoint, endPoint, wallname);
+
+        this.resetBuildUI();
+    }
+
+    private buildWall(startPoint: Position, endPoint: Position, name: string) {
         // Draw the rectangle / wall line
         let wall = new Wall();
-        wall.name = wallname;
+        wall.name = name;
         this.app.stage.addChild(wall);
 
         // create wall definitions
         let wallLength = Math.sqrt(
-            Math.pow(endPoint.x - this.startPoint.x, 2) + Math.pow(endPoint.y - this.startPoint.y, 2));
+            Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2));
         wall.beginFill('grey', 50);
         wall.drawRoundedRect(-wallWidth / 2, -wallWidth / 2, wallLength + wallWidth, wallWidth, 5);
 
         // define container location
-        wall.x = this.startPoint.x;
-        wall.y = this.startPoint.y;
+        wall.x = startPoint.x;
+        wall.y = startPoint.y;
         wall.endX = endPoint.x;
         wall.endY = endPoint.y;
 
         // find angle for rectangle
         wall.angle = Math.atan2(
-            endPoint.y - this.startPoint.y,
-            endPoint.x - this.startPoint.x) * (180 / Math.PI);
-
-        this.resetBuildUI();
+            endPoint.y - startPoint.y,
+            endPoint.x - startPoint.x) * (180 / Math.PI);
     }
 
-    resetBuildUI() {
-        this.startPoint = null;
-        this.editingUICont.visible = false;
+    // create 4 border walls 
+    createBorderWalls() {
+        const screenWidth = this.app.renderer.width;
+        const screenHeight = this.app.renderer.height;
+        
+        console.log(`Width: ${screenWidth}, Height: ${screenHeight}`);
+        
+        this.buildWall({x:0, y:0}, {x:0, y:screenHeight}, borderWallName);
+        this.buildWall({x:0, y:0}, {x:screenWidth, y:0}, borderWallName);
+        this.buildWall({x:screenWidth, y:screenHeight}, {x:screenWidth,y:0}, borderWallName);
+        this.buildWall({x:screenWidth, y:screenHeight}, {x:0,y:screenHeight}, borderWallName);
     }
-
-    setActive(isActive: boolean) {
-        if (isActive){
-            this.app.view.addEventListener('mousedown', this.handleMd);
-            this.app.view.addEventListener('mouseup', this.handleMu);
-        }else{
-            this.app.view.removeEventListener('mousedown', this.handleMd);
-            this.app.view.removeEventListener('mouseup', this.handleMu);
-        }
-    }
-
-    destroyAll() {
-        this.resetBuildUI()
-        const walls = this.app.stage.children.filter(child => child.name === wallname);
+    destroyBorderWalls(){
+        const walls = this.app.stage.children.filter(child => child.name === borderWallName);
 
         walls.forEach(wall => {
             this.app.stage.removeChild(wall);
@@ -105,8 +106,33 @@ export class Building implements ControlInterface{
         });
     }
 
-    getAllWallPos(): WallCoordinate[]{
-        let wallsList = this.app.stage.children.filter(child => child.name === wallname) as Wall[]
+    private resetBuildUI() {
+        this.startPoint = null;
+        this.editingUICont.visible = false;
+    }
+
+    setActive(isActive: boolean) {
+        if (isActive) {
+            this.app.view.addEventListener('mousedown', this.handleMd);
+            this.app.view.addEventListener('mouseup', this.handleMu);
+        } else {
+            this.app.view.removeEventListener('mousedown', this.handleMd);
+            this.app.view.removeEventListener('mouseup', this.handleMu);
+        }
+    }
+
+    destroyAll() {
+        this.resetBuildUI()
+        const walls = this.getAllWalls();
+
+        walls.forEach(wall => {
+            this.app.stage.removeChild(wall);
+            wall.destroy();
+        });
+    }
+
+    getAllWallPos(): WallCoordinate[] {
+        let wallsList = this.getAllWalls() as Wall[]
         return wallsList.map(
             (wall: Wall) => ({
                 startPos: {
@@ -118,6 +144,11 @@ export class Building implements ControlInterface{
                     y: wall.endY
                 }
             }))
+    }
+    getAllWalls(){
+        return this.app.stage.children
+            .filter(child => child.name === wallname ||
+                child.name === borderWallName ) as Graphics[];
     }
 }
 

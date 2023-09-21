@@ -1,20 +1,22 @@
 import { Graphics, Container, DisplayObject, Application } from 'pixi.js';
-import { wallWidth } from './building';
+import { Building, wallWidth } from './building';
 
 export class Eraser implements ControlInterface{
     private app: Application<HTMLCanvasElement>;
-    constructor(app : Application<HTMLCanvasElement>) {
+    private bc : Building;
+    constructor(
+        app : Application<HTMLCanvasElement>,
+        buildingComponent: Building) {
         this.app = app;
+        this.bc = buildingComponent;
     }
     htmlFormValue: string = 'eraseWall';
 
     setActive(isActive: boolean) {
+        const walls = this.bc.getAllWalls();
         if (isActive) {
-            const walls = this.getWalls();
-
             walls.forEach(this.attachListenersToWall);
         } else {
-            const walls = this.getWalls();
             walls.forEach(wall => {
                 wall.eventMode = 'none';
                 wall.removeAllListeners();
@@ -22,11 +24,6 @@ export class Eraser implements ControlInterface{
         }
     }
     destroyAll: () => void = ()=>{};
-
-    getWalls(): Graphics[] {
-        return this.app.stage.children
-            .filter(child => child.name === 'wall') as Graphics[];
-    }
 
     attachListenersToWall = (wall: Graphics) => {
         wall.eventMode = 'static';

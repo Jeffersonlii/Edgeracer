@@ -27,7 +27,7 @@ function buildapp() {
 
     const contrComponents: ControlInterface[]  = [
         buildingComponent,
-        new Eraser(app),
+        new Eraser(app,buildingComponent),
         sgoalsComponent,
         fgoalsComponent];
     new Controls(contrComponents);
@@ -38,12 +38,21 @@ function buildapp() {
         buildingComponent,
         sgoalsComponent,
         fgoalsComponent);
+    
+    // create borders
+    buildingComponent.createBorderWalls();
 
     // add subs 
     (() => {
         document.getElementById('destroyButton')?.addEventListener('click', () => {
+            let htmlcontrols = document.getElementsByName('controls');
+            for (let i = 0; i < htmlcontrols.length; i++) {
+                (htmlcontrols[i] as HTMLInputElement).checked = false;
+            }
+            
             contrComponents.forEach((c)=>c.destroyAll());
             env.destroy();
+            buildingComponent.createBorderWalls();
         });
 
         document.getElementById('trainButton')?.addEventListener('click', () => {
