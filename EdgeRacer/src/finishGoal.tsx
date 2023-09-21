@@ -26,9 +26,7 @@ export class FinishGoal implements ControlInterface{
     constructor(app : Application<HTMLCanvasElement>) {
         this.app = app;
         this.finishGraphic = new Text('Finish', style);
-        this.finishGraphic.name = 'finish'
-
-        app.view.addEventListener('mouseup', this.handleMc);
+        this.finishGraphic.name = 'finish';
     }
     htmlFormValue: string = 'addFinishLine';
 

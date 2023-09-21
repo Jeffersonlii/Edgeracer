@@ -1,4 +1,5 @@
 import { Graphics, Container, Application } from 'pixi.js';
+import { Position } from './mathHelpers';
 
 export const wallWidth = 10;
 // wrapper class for a walls
@@ -6,7 +7,7 @@ export class Wall extends Graphics {
     endX!: number;
     endY!: number;
 }
-
+const wallname = 'wall123';
 export class Building implements ControlInterface{
     private app: Application<HTMLCanvasElement>;
 
@@ -52,7 +53,7 @@ export class Building implements ControlInterface{
 
         // Draw the rectangle / wall line
         let wall = new Wall();
-        wall.name = 'wall';
+        wall.name = wallname;
         this.app.stage.addChild(wall);
 
         // create wall definitions
@@ -92,12 +93,30 @@ export class Building implements ControlInterface{
 
     destroyAll() {
         this.resetBuildUI()
-        const walls = this.app.stage.children.filter(child => child.name === 'wall');
+        const walls = this.app.stage.children.filter(child => child.name === wallname);
 
         walls.forEach(wall => {
             this.app.stage.removeChild(wall);
             wall.destroy();
         });
+    }
+
+    getAllWallPos(): {
+        startPos: Position;
+        endPos: Position;
+    }[]{
+        let wallsList = this.app.stage.children.filter(child => child.name === wallname) as Wall[]
+        return wallsList.map(
+            (wall: Wall) => ({
+                startPos: {
+                    x: wall.x,
+                    y: wall.y
+                },
+                endPos: {
+                    x: wall.endX,
+                    y: wall.endY
+                }
+            }))
     }
 }
 

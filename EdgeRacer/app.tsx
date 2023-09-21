@@ -6,6 +6,8 @@ import { FinishGoal } from './src/finishGoal';
 import { Agent } from './src/model/agent';
 import { StartingGoal } from './src/startingGoal'; 
 import { DQL } from './src/model/DQL';
+import { GameEnvironment } from './src/model/GameEnvironment';
+import { Action } from './src/model/envModels';
 
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
@@ -19,11 +21,12 @@ function buildapp() {
     appContainer.appendChild(app.view);
 
     //load in control components 
+    const buildingComponent = new Building(app);
     const sgoalsComponent = new StartingGoal(app);
     const fgoalsComponent = new FinishGoal(app);
 
     const contrComponents: ControlInterface[]  = [
-        new Building(app),
+        buildingComponent,
         new Eraser(app),
         sgoalsComponent,
         fgoalsComponent];
@@ -43,12 +46,19 @@ function buildapp() {
                 return;
             }
 
-            let player = new Agent(app, {
-                startPosition: sgoalsComponent.getPosition(),
-                goalPosition: fgoalsComponent.getPosition(),
-             }, new DQL()); 
-            
-            player.spawnAndTrain();
+            let env = new GameEnvironment(
+                app,
+                buildingComponent,
+                sgoalsComponent,
+                fgoalsComponent);
+
+            env.reset();
+
+            console.log("fps is " + app.ticker.FPS);
+            app.ticker.maxFPS = 60;
+            app.ticker.add(() => {
+                console.log(env.step(Action.ACCELERATE));
+            })
         });
     })();
 }

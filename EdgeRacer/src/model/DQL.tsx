@@ -1,5 +1,6 @@
 import { State } from "pixi.js";
 import * as tf from '@tensorflow/tfjs';
+import { GameEnvironment } from "./GameEnvironment";
 // Deep Q Learning
 
 //https://www.analyticsvidhya.com/blog/2019/04/introduction-deep-q-learning-python/
@@ -9,15 +10,10 @@ export class DQL{
 
     constructor(nnOptions: any = {}){
         this.model = tf.sequential();
-        // todo define the main and  
+        // todo define the policy and target
     }
 
-    private transformInput(input : State){
-        // normalize and transform input state
-    } 
-    predict (input: State){
-        const modelInput = this.transformInput(input);
+    train(env : GameEnvironment){
 
-        
     }
 }
