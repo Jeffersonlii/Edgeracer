@@ -32,10 +32,18 @@ function buildapp() {
         fgoalsComponent];
     new Controls(contrComponents);
 
+    // load in Environment
+    let env = new GameEnvironment(
+        app,
+        buildingComponent,
+        sgoalsComponent,
+        fgoalsComponent);
+
     // add subs 
     (() => {
         document.getElementById('destroyButton')?.addEventListener('click', () => {
             contrComponents.forEach((c)=>c.destroyAll());
+            env.destroy();
         });
 
         document.getElementById('trainButton')?.addEventListener('click', () => {
@@ -46,12 +54,7 @@ function buildapp() {
                 return;
             }
 
-            let env = new GameEnvironment(
-                app,
-                buildingComponent,
-                sgoalsComponent,
-                fgoalsComponent);
-
+            env.reset();
             ManualControl.runLoop(app,env);
             
         });

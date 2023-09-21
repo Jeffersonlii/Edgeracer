@@ -76,6 +76,15 @@ export class GameEnvironment {
         return this.currentState;
     }
 
+    destroy(){
+        if(this.carCont){
+            this.app.stage.removeChild(this.carCont)
+        }
+        this.carCont = undefined;
+        this.currentState = undefined;
+        this.goalPosition = undefined;
+    }
+
     // next step, should be called once per frame as each frame represents a step in the Q learning process
     step(action: Action): {
         state: QState,

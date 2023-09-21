@@ -1,4 +1,4 @@
-import { Application } from "pixi.js";
+import { Application, Ticker } from "pixi.js";
 import { GameEnvironment } from "./gameEnvironment";
 import { Action } from "./envModels";
 
@@ -8,7 +8,6 @@ const keys = {
     s: false,
     d: false
 };
-
 // take manual control of the car, mostly for debugging 
 export class ManualControl {
     static runLoop(app: Application<HTMLCanvasElement>, env: GameEnvironment) {
@@ -19,10 +18,10 @@ export class ManualControl {
         app.ticker.maxFPS = 60;
         console.log("fps is " + app.ticker.FPS);
         app.ticker.add(() => {
-            if(keys.w && keys.a){
+            if (keys.w && keys.a) {
                 env.step(Action.ACCEL_LEFT)
             }
-            else if(keys.w && keys.d){
+            else if (keys.w && keys.d) {
                 env.step(Action.ACCEL_RIGHT)
             }
             else if (keys.w) {
@@ -40,7 +39,8 @@ export class ManualControl {
             else {
                 env.step(undefined as unknown as Action);
             }
-        })
+        }
+        )
     }
     private static addListeners() {
         document.addEventListener('keydown', (e) => {
