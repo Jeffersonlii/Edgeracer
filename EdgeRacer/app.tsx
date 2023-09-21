@@ -5,8 +5,9 @@ import { Eraser } from './src/eraser';
 import { FinishGoal } from './src/finishGoal';
 import { StartingGoal } from './src/startingGoal'; 
 import { DQL } from './src/model/DQL';
-import { GameEnvironment } from './src/model/GameEnvironment';
+import { GameEnvironment } from './src/model/gameEnvironment';
 import { Action } from './src/model/envModels';
+import { ManualControl } from './src/model/manualControl';
 
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
@@ -51,13 +52,8 @@ function buildapp() {
                 sgoalsComponent,
                 fgoalsComponent);
 
-            env.reset();
-
-            console.log("fps is " + app.ticker.FPS);
-            app.ticker.maxFPS = 60;
-            app.ticker.add(() => {
-                console.log(env.step(Action.ACCELERATE));
-            })
+            ManualControl.runLoop(app,env);
+            
         });
     })();
 }

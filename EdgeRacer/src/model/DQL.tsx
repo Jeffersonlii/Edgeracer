@@ -1,6 +1,6 @@
 import { State } from "pixi.js";
 import * as tf from '@tensorflow/tfjs';
-import { GameEnvironment } from "./GameEnvironment";
+import { GameEnvironment } from "./gameEnvironment";
 // Deep Q Learning
 
 //https://www.analyticsvidhya.com/blog/2019/04/introduction-deep-q-learning-python/

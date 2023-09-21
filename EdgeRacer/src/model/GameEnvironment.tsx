@@ -1,17 +1,21 @@
 import { Application, Container, Graphics, Point } from "pixi.js";
 import { Action, QState, EnvState } from "./envModels";
 import { Building, Wall, WallCoordinate } from "../building";
-import { Position, calcDist, iPointDataToPosition, intersectionOfSegments } from "../mathHelpers";
+import { Position, calcDist, calcPositionAfterMoving, calcVelocity, iPointDataToPosition, intersectionOfSegments } from "../mathHelpers";
 import { StartingGoal } from "../startingGoal";
 import { FinishGoal } from "../finishGoal";
 
 const carContName = 'carcont123';
 const maxEyeDist = 10000;
+const topVelo = 50;
+const topAcceleration = 5;
+const accelStep = 0.1;
+const breakingStep = 1;
 
 // objects for finding the eye ends of the car
-const centerEnd = new Point(0, 500);
-const rightEnd = new Point(-250, 500);
-const leftEnd = new Point(250, 500);
+const centerEnd = new Point(500, 0);
+const rightEnd = new Point(500, -250);
+const leftEnd = new Point(500, 250);
 // API for the game environment for the DQL to train with
 export class GameEnvironment {
     private app: Application<HTMLCanvasElement>;
@@ -34,7 +38,7 @@ export class GameEnvironment {
         this.bc = buildingComponent;
         this.sgc = sgoalsComponent;
         this.fgc = fgoalsComponent;
-    }   
+    }
 
     // reset the environment, initialize all global variables like the walls and game state
     // create the car assets 
@@ -60,7 +64,8 @@ export class GameEnvironment {
             goalDelta: calcDist(startingPosition, this.goalPosition),
             position: startingPosition,
             angle: 0,
-            velocity: 0
+            velocity: 0,
+            acceleration: 0
         }
 
         this.app.stage.addChild(this.carCont);
@@ -73,24 +78,102 @@ export class GameEnvironment {
         state: QState,
         reward: number
     } {
-        if (!this.carCont || !this.currentState || ! this.goalPosition) {
+        if (!this.carCont || !this.currentState || !this.goalPosition) {
             throw new Error('Please Call env.reset() to instantiated game');
         }
         // get reward
         let reward = this.getReward(this.currentState, action);
 
         // apply action from state 
+        let newAccel = this.currentState.acceleration;
+        let newVelocty = this.currentState.velocity;
+        switch (action) {
+            case Action.ACCELERATE: {
+                console.log("Accelerating...");
+
+                // compute new speed metrics
+                newAccel = Math.min(newAccel + accelStep, topAcceleration);
+                newVelocty = Math.min(newAccel + newAccel, topVelo);
+
+                // compute new position
+                let { x, y } = calcPositionAfterMoving({
+                    x: this.carCont.x,
+                    y: this.carCont.y
+                }, this.carCont.angle, newVelocty);
+
+                //update position
+                this.carCont.x = x
+                this.carCont.y = y
+
+                break;
+            }
+            case Action.BREAK: {
+                console.log("Breaking...");
+
+                // compute new speed metrics
+                newAccel = Math.max(newAccel - breakingStep, -topAcceleration);
+                newVelocty = Math.max(newAccel + newAccel, -topVelo);
+
+                // compute new position
+                let { x, y } = calcPositionAfterMoving({
+                    x: this.carCont.x,
+                    y: this.carCont.y
+                }, this.carCont.angle, newVelocty);
+
+                //update position
+                this.carCont.x = x
+                this.carCont.y = y
+                break;
+            }
+            case Action.LEFT_TURN:
+                console.log("Turning left...");
+                break;
+            case Action.RIGHT_TURN:
+                console.log("Turning right...");
+                break;
+            case Action.ACCEL_LEFT:
+                console.log("Accelerating and turning left...");
+                break;
+            case Action.ACCEL_RIGHT:
+                console.log("Accelerating and turning right...");
+                break;
+            default: {
+                console.log("No Input");
+
+                // compute new speed metrics
+                newAccel = Math.max(newAccel - accelStep, -topAcceleration);
+                newVelocty = Math.max(newAccel + newAccel, 0);
+
+                // compute new position
+                let { x, y } = calcPositionAfterMoving({
+                    x: this.carCont.x,
+                    y: this.carCont.y
+                }, this.carCont.angle, newVelocty);
+
+                //update position
+                this.carCont.x = x
+                this.carCont.y = y
+                break;
+            }
+
+
+        }
 
         // ----- get new state -----
         // get new position
-        // get new angle 
-        this.carCont.angle += 1;
+        let resultantPos = {
+            x: this.carCont.x,
+            y: this.carCont.y,
+        };
 
-        // ----- update to new state
+        // ----- update to new state -----
         this.currentState = {
-            ...this.currentState,
             ...this.getWallDeltasToAgent(this.carCont, this.wallsCords),
             angle: this.carCont.angle,
+            goalDelta: calcDist(resultantPos, this.goalPosition),
+            position: resultantPos,
+            velocity: newVelocty,
+            acceleration: newAccel
         }
 
         // return new state and reward
@@ -100,17 +183,19 @@ export class GameEnvironment {
         };
     }
 
+    // ------------ pure functions -----------
+
     private getReward(state: QState, action: Action): number {
         return 0;
     }
 
-    private getWallDeltasToAgent(carCont: Container, wallsCords: WallCoordinate[] ) {
+    private getWallDeltasToAgent(carCont: Container, wallsCords: WallCoordinate[]) {
         //remove all debugs
         this.app.stage.children.filter(child => child.name === 'debug')
-        .forEach(deb => {
-            this.app.stage.removeChild(deb);
-            deb.destroy();
-        });
+            .forEach(deb => {
+                this.app.stage.removeChild(deb);
+                deb.destroy();
+            });
 
 
         let eyesEnds = {
@@ -123,7 +208,7 @@ export class GameEnvironment {
         let closestFront = maxEyeDist;
         let closestLeft = maxEyeDist;
         let closestRight = maxEyeDist;
-        let carPos = {x: carCont.x, y: carCont.y};
+        let carPos = { x: carCont.x, y: carCont.y };
         for (let i = 0; i < wallsCords.length; i++) {
             let wall = wallsCords[i]
 
@@ -176,26 +261,26 @@ export class GameEnvironment {
         // spawn in car graphic
         car.clear()
         car.beginFill('red', 50);
-        car.drawEllipse(0, 0, 10, 30);
+        car.drawEllipse(0, 0, 30, 10);
         carCont.addChild(car);
 
         // spawn in eye lines
         let midLine = new Graphics();
         midLine.lineStyle(2, 'blue', 0.5)
             .moveTo(0, 0)
-            .lineTo(0, 500);
+            .lineTo(500, 0);
         carCont.addChild(midLine)
 
         let leftLine = new Graphics();
         midLine.lineStyle(2, 'blue', 0.5)
             .moveTo(0, 0)
-            .lineTo(250, 500);
+            .lineTo(500, 250);
         carCont.addChild(leftLine)
 
         let rightLine = new Graphics();
         midLine.lineStyle(2, 'blue', 0.5)
             .moveTo(0, 0)
-            .lineTo(-250, 500);
+            .lineTo(500, -250);
         carCont.addChild(rightLine)
 
         return carCont;

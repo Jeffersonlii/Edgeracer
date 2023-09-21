@@ -42,7 +42,23 @@ export function calcDist(point1: Position, point2: Position) {
 
 export function iPointDataToPosition(d: IPointData): Position {
   return {
-      x: d.x,
-      y: d.y
+    x: d.x,
+    y: d.y
+  }
+}
+
+export function calcPositionAfterMoving(
+  initialPosition: Position,
+  angle: number, // in degrees
+  velocity: number): Position {
+
+  let rad = angle * (Math.PI / 180) 
+
+  const deltaX = velocity * Math.cos(rad);
+  const deltaY = velocity * Math.sin(rad);
+
+  return {
+    x: initialPosition.x + deltaX,
+    y: initialPosition.y + deltaY
   }
 }
