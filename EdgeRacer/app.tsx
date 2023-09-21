@@ -45,13 +45,20 @@ function buildapp() {
     // add subs 
     (() => {
         document.getElementById('destroyButton')?.addEventListener('click', () => {
+            
+            // uncheck all control radio buttons
             let htmlcontrols = document.getElementsByName('controls');
             for (let i = 0; i < htmlcontrols.length; i++) {
                 (htmlcontrols[i] as HTMLInputElement).checked = false;
             }
             
+            // destroy all components
             contrComponents.forEach((c)=>c.destroyAll());
+
+            // destroy game environment
             env.destroy();
+
+            // rebuild border walls
             buildingComponent.createBorderWalls();
         });
 
