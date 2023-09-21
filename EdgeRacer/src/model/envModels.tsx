@@ -23,5 +23,5 @@ export interface QState {
 // The overall State of the game, with datapoints not fed to the policy network
 export interface EnvState extends QState{
     position : Position;
-    acceleration : number; 
+    turningRate: number;
 }

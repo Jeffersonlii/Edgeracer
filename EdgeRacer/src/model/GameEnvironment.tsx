@@ -1,16 +1,19 @@
 import { Application, Container, Graphics, Point } from "pixi.js";
 import { Action, QState, EnvState } from "./envModels";
 import { Building, Wall, WallCoordinate } from "../building";
-import { Position, calcDist, calcPositionAfterMoving, calcVelocity, iPointDataToPosition, intersectionOfSegments } from "../mathHelpers";
+import { Position, calcDist, calcVelocity, clamp, iPointDataToPosition, intersectionOfSegments } from "../mathHelpers";
 import { StartingGoal } from "../startingGoal";
 import { FinishGoal } from "../finishGoal";
 
+// ------- Car Drivability Metrics --------
 const carContName = 'carcont123';
 const maxEyeDist = 10000;
-const topVelo = 50;
-const topAcceleration = 5;
-const accelStep = 0.1;
-const breakingStep = 1;
+const topVelo = 10;
+const topAcceleration = 0.1;
+const accelUnderBreaking = 0.5;
+const passiveBreaking = 0.1;
+const turnAccel = 0.3; // degrees per frame
+const maxTurnRate = 6; // degrees per frame
 
 // objects for finding the eye ends of the car
 const centerEnd = new Point(500, 0);
@@ -65,7 +68,7 @@ export class GameEnvironment {
             position: startingPosition,
             angle: 0,
             velocity: 0,
-            acceleration: 0
+            turningRate: 0,
         }
 
         this.app.stage.addChild(this.carCont);
@@ -73,7 +76,7 @@ export class GameEnvironment {
         return this.currentState;
     }
 
-    // next step 
+    // next step, should be called once per frame as each frame represents a step in the Q learning process
     step(action: Action): {
         state: QState,
         reward: number
@@ -84,97 +87,33 @@ export class GameEnvironment {
         // get reward
         let reward = this.getReward(this.currentState, action);
 
-        // apply action from state 
-        let newAccel = this.currentState.acceleration;
-        let newVelocty = this.currentState.velocity;
-        switch (action) {
-            case Action.ACCELERATE: {
-                console.log("Accelerating...");
+        // ------ computing new state -------
+        // new velocity and angle of car after the action
+        let newTelemetry = this.computeNewTelemetry(
+            action,
+            this.currentState.velocity,
+            this.currentState.angle,
+            this.currentState.turningRate);
+        console.log(newTelemetry)
 
-                // compute new speed metrics
-                newAccel = Math.min(newAccel + accelStep, topAcceleration);
-                newVelocty = Math.min(newAccel + newAccel, topVelo);
-
-                // compute new position
-                let { x, y } = calcPositionAfterMoving({
-                    x: this.carCont.x,
-                    y: this.carCont.y
-                }, this.carCont.angle, newVelocty);
-
-                //update position
-                this.carCont.x = x
-                this.carCont.y = y
-
-                break;
-            }
-            case Action.BREAK: {
-                console.log("Breaking...");
-
-                // compute new speed metrics
-                newAccel = Math.max(newAccel - breakingStep, -topAcceleration);
-                newVelocty = Math.max(newAccel + newAccel, -topVelo);
-
-                // compute new position
-                let { x, y } = calcPositionAfterMoving({
-                    x: this.carCont.x,
-                    y: this.carCont.y
-                }, this.carCont.angle, newVelocty);
-
-                //update position
-                this.carCont.x = x
-                this.carCont.y = y
-                break;
-            }
-            case Action.LEFT_TURN:
-                console.log("Turning left...");
-                break;
-            case Action.RIGHT_TURN:
-                console.log("Turning right...");
-                break;
-            case Action.ACCEL_LEFT:
-                console.log("Accelerating and turning left...");
-                break;
-            case Action.ACCEL_RIGHT:
-                console.log("Accelerating and turning right...");
-                break;
-            default: {
-                console.log("No Input");
-
-                // compute new speed metrics
-                newAccel = Math.max(newAccel - accelStep, -topAcceleration);
-                newVelocty = Math.max(newAccel + newAccel, 0);
-
-                // compute new position
-                let { x, y } = calcPositionAfterMoving({
-                    x: this.carCont.x,
-                    y: this.carCont.y
-                }, this.carCont.angle, newVelocty);
-
-                //update position
-                this.carCont.x = x
-                this.carCont.y = y
-                break;
-            }
-
-
-        }
-
-        // ----- get new state -----
-        // get new position
-        let resultantPos = {
-            x: this.carCont.x,
-            y: this.carCont.y,
-        };
+        // compute new position from new velocity and angle
+        let resultantPos = this.calcPositionAfterMoving(
+            this.currentState.position,
+            newTelemetry.angle,
+            newTelemetry.velocity);
 
         // ----- update to new state -----
         this.currentState = {
             ...this.getWallDeltasToAgent(this.carCont, this.wallsCords),
-            angle: this.carCont.angle,
+            angle: newTelemetry.angle,
             goalDelta: calcDist(resultantPos, this.goalPosition),
             position: resultantPos,
-            velocity: newVelocty,
-            acceleration: newAccel
+            velocity: newTelemetry.velocity,
+            turningRate: newTelemetry.turningRate
         }
+
+        //------ sync graphic ------
+        this.syncCarContainer(this.currentState.position, this.currentState.angle);
 
         // return new state and reward
         return {
@@ -188,7 +127,85 @@ export class GameEnvironment {
     private getReward(state: QState, action: Action): number {
         return 0;
     }
+    private computeNewTelemetry(action: Action,
+        velocity: number,
+        angle: number,
+        turningRate: number) {
+        let accel = 0;
 
+        // 'return to zero' on no action
+        if (action !== Action.ACCEL_LEFT && action !== Action.ACCEL_RIGHT) {
+            if (action !== Action.ACCELERATE && action !== Action.BREAK) {
+                if (velocity > passiveBreaking) {
+                    accel = -passiveBreaking;
+                } else {
+                    accel = 0
+                    velocity = 0
+                }
+            }
+            if (action !== Action.LEFT_TURN && action !== Action.RIGHT_TURN) {
+                // leave a gap for imprecision (0.1 + 0.2 = 0.30...01)
+                if (turningRate > turnAccel) {
+                    turningRate -= turnAccel;
+                } else if (turningRate < -turnAccel) {
+                    turningRate += turnAccel;
+                } else {
+                    turningRate = 0
+                }
+            }
+        }
+
+        // handle actiopns
+        switch (action) {
+            case Action.ACCELERATE: {
+                console.log("Accelerating...");
+                accel = topAcceleration;
+            }
+                break;
+            case Action.BREAK: {
+                console.log("Breaking...");
+                accel = -accelUnderBreaking;
+            }
+                break;
+            case Action.LEFT_TURN:
+                console.log("Turning left...");
+                turningRate = clamp(turningRate - turnAccel, -maxTurnRate, maxTurnRate);
+                break;
+            case Action.RIGHT_TURN:
+                console.log("Turning right...");
+                turningRate = clamp(turningRate + turnAccel, -maxTurnRate, maxTurnRate);
+                break;
+            case Action.ACCEL_LEFT:
+                console.log("Accelerating and turning left...");
+                accel = topAcceleration;
+                turningRate = clamp(turningRate - turnAccel, -maxTurnRate, maxTurnRate);
+                break;
+            case Action.ACCEL_RIGHT:
+                console.log("Accelerating and turning right...");
+                accel = topAcceleration;
+                turningRate = clamp(turningRate + turnAccel, -maxTurnRate, maxTurnRate);
+                break;
+            default: {
+                console.log("No Input");
+            }
+        }
+        return {
+            velocity: clamp(velocity + accel, 0, topVelo),
+            angle: angle + turningRate,
+            turningRate
+        }
+
+    }
+    // Sync the game state with the car container graphic on screen
+    private syncCarContainer(pos: Position, angle: number) {
+        if (!this.carCont) {
+            throw new Error('carContainer is not instantiated');
+        }
+
+        this.carCont.x = pos.x;
+        this.carCont.y = pos.y;
+        this.carCont.angle = angle;
+    }
     private getWallDeltasToAgent(carCont: Container, wallsCords: WallCoordinate[]) {
         //remove all debugs
         this.app.stage.children.filter(child => child.name === 'debug')
@@ -248,7 +265,21 @@ export class GameEnvironment {
             rightfrontDelta: closestRight,
         };
     }
+    private calcPositionAfterMoving(
+        initialPosition: Position,
+        angle: number, // in degrees
+        velocity: number): Position {
 
+        let rad = angle * (Math.PI / 180)
+
+        const deltaX = velocity * Math.cos(rad);
+        const deltaY = velocity * Math.sin(rad);
+
+        return {
+            x: initialPosition.x + deltaX,
+            y: initialPosition.y + deltaY
+        }
+    }
     private setupNewCar(position: Position): Container {
         let carCont = new Container();
         carCont.name = carContName;

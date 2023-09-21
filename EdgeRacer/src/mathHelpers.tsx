@@ -47,18 +47,6 @@ export function iPointDataToPosition(d: IPointData): Position {
   }
 }
 
-export function calcPositionAfterMoving(
-  initialPosition: Position,
-  angle: number, // in degrees
-  velocity: number): Position {
-
-  let rad = angle * (Math.PI / 180) 
-
-  const deltaX = velocity * Math.cos(rad);
-  const deltaY = velocity * Math.sin(rad);
-
-  return {
-    x: initialPosition.x + deltaX,
-    y: initialPosition.y + deltaY
-  }
+export function clamp(number: number, lowerBound: number, upperBound: number) {
+  return Math.max(lowerBound, Math.min(number, upperBound));
 }
