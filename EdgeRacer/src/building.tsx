@@ -7,7 +7,7 @@ export class Wall extends Graphics {
     endX!: number;
     endY!: number;
 }
-interface WallCoordinate{
+export interface WallCoordinate{
     startPos: Position;
     endPos: Position;
 }
