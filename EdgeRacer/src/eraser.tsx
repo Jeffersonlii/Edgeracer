@@ -45,7 +45,6 @@ export class Eraser implements ControlInterface{
         wall.on('click', () => {
             this.erase(wall);
         });
-
     }
 
     erase(wall: Graphics) {

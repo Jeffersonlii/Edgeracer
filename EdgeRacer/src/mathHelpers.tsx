@@ -50,3 +50,18 @@ export function iPointDataToPosition(d: IPointData): Position {
 export function clamp(number: number, lowerBound: number, upperBound: number) {
   return Math.max(lowerBound, Math.min(number, upperBound));
 }
+
+// if position is within the bounds of the displayobject
+export function positionIsWithinDisplayObj(pos: Position, dobj: DisplayObject) {
+  // Get the global bounds of the displayObject
+  let { x, y } = pos;
+  const bounds = dobj.getBounds();
+
+  // Check if the point {x, y} is within the bounds
+  return (
+      x >= bounds.x &&
+      x <= bounds.x + bounds.width &&
+      y >= bounds.y &&
+      y <= bounds.y + bounds.height
+  );
+}

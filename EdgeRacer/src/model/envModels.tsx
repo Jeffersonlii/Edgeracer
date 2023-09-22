@@ -1,3 +1,4 @@
+import { Container } from "pixi.js";
 import { Position } from "../mathHelpers";
 
 export enum Action{
@@ -22,6 +23,8 @@ export interface QState {
 
 // The overall State of the game, with datapoints not fed to the policy network
 export interface EnvState extends QState{
-    position : Position;
-    turningRate: number;
+    position : Position; // position of car
+    turningRate: number; // turning acceleration of car
+    carCont: Container; // car container of game
+    goalPosition: Position; // position of game goal
 }

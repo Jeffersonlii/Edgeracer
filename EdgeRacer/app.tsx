@@ -4,17 +4,13 @@ import { Controls } from './src/controls';
 import { Eraser } from './src/eraser';
 import { FinishGoal } from './src/finishGoal';
 import { StartingGoal } from './src/startingGoal'; 
-import { DQL } from './src/model/DQL';
 import { GameEnvironment } from './src/model/gameEnvironment';
-import { Action } from './src/model/envModels';
 import { ManualControl } from './src/model/manualControl';
 
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
     if (!appContainer) return;
     const app = new Application<HTMLCanvasElement>({
-        // width: appContainer.clientWidth,
-        // height: appContainer.clientHeight,
         resizeTo: appContainer,
     });
 
@@ -77,8 +73,7 @@ function buildapp() {
             if(!(sgoalsComponent.exists() && fgoalsComponent.exists())){
                 alert('Please Place a Start and Finish Position First!');
                 return;
-            }
-
+            }            
             env.reset();
             ManualControl.runLoop(app,env);
             

@@ -34,8 +34,6 @@ export class Building implements ControlInterface {
     htmlFormValue: string = 'buildWall';
 
     private handleMd = (event: any) => {
-        // if (!this.buildingMode) return;
-
         const { offsetX, offsetY } = event;
 
         // Store the coordinates of the first click
@@ -89,9 +87,7 @@ export class Building implements ControlInterface {
     createBorderWalls() {
         const screenWidth = this.app.renderer.width;
         const screenHeight = this.app.renderer.height;
-        
-        console.log(`Width: ${screenWidth}, Height: ${screenHeight}`);
-        
+                
         this.buildWall({x:0, y:0}, {x:0, y:screenHeight}, borderWallName);
         this.buildWall({x:0, y:0}, {x:screenWidth, y:0}, borderWallName);
         this.buildWall({x:screenWidth, y:screenHeight}, {x:screenWidth,y:0}, borderWallName);
@@ -145,7 +141,9 @@ export class Building implements ControlInterface {
                 }
             }))
     }
-    getAllWalls(){
+
+    // todo : replace with proximity walls, only walls in the sectore of the car 
+    getAllWalls(): Graphics[]{
         return this.app.stage.children
             .filter(child => child.name === wallname ||
                 child.name === borderWallName ) as Graphics[];

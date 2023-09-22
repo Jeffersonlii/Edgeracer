@@ -1,4 +1,5 @@
 import { Text, TextStyle, Application } from 'pixi.js';
+import { Position } from './mathHelpers';
 
 
 const style = new TextStyle({
@@ -56,7 +57,7 @@ export class FinishGoal implements ControlInterface{
         return !! this.app.stage.getChildByName('finish');
     }
 
-    getPosition(){
+    getPosition() : Position{
         return {
             x: this.finishGraphic.x + this.finishGraphic.width / 2,
             y: this.finishGraphic.y + this.finishGraphic.height / 2};
