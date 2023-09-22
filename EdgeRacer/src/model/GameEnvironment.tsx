@@ -110,7 +110,7 @@ export class GameEnvironment {
             newTelemetry.angle,
             newTelemetry.velocity);
 
-        // ----- update to new state -----
+        // ----- update to new state, s prime -----
         this.currentState = {
             ...this.currentState,
             ...this.getWallDeltasToAgent(this.currentState.carCont, this.wallsCords),
@@ -134,8 +134,6 @@ export class GameEnvironment {
             reward
         };
     }
-
-
 
     // ------------ pure functions -----------
 
