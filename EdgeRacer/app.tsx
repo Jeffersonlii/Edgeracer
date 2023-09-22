@@ -1,4 +1,4 @@
-import { Application, Assets, Sprite, Graphics } from 'pixi.js';
+import { Application } from 'pixi.js';
 import { Building } from './src/building';
 import { Controls } from './src/controls';
 import { Eraser } from './src/eraser';

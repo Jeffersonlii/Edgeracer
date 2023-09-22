@@ -1,4 +1,4 @@
-import { IPointData } from "pixi.js";
+import { DisplayObject, IPointData } from "pixi.js";
 
 export type Position = {
   x: number,
