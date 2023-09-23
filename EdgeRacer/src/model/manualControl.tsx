@@ -10,72 +10,98 @@ const keys = {
 };
 // take manual control of the car, mostly for debugging 
 export class ManualControl {
-    static runLoop(app: Application<HTMLCanvasElement>, env: GameEnvironment) {
-        this.addListeners();
+    static t: Ticker;
 
+    static runLoop(env: GameEnvironment) {
+
+        // ---- clean up previous runs -----
+        if (this.t) {
+            // throws error if t is already destroyed
+            try {
+                this.t.destroy();
+            } catch (error) {}
+        }
+        this.removeListeners();
         env.reset();
 
-        app.ticker.maxFPS = 60;
-        console.log("fps is " + app.ticker.FPS);
-        app.ticker.add(() => {
+
+
+        // ----- set up current run ------
+        this.addListeners();
+        const carTicker = new Ticker();
+        carTicker.maxFPS = 60;
+        console.log("fps is " + carTicker.FPS);
+
+        this.t = carTicker.add(() => {
+            let s;
             if (keys.w && keys.a) {
-                env.step(Action.ACCEL_LEFT)
+                s = env.step(Action.ACCEL_LEFT)
             }
             else if (keys.w && keys.d) {
-                env.step(Action.ACCEL_RIGHT)
+                s = env.step(Action.ACCEL_RIGHT)
             }
             else if (keys.w) {
-                env.step(Action.ACCELERATE)
+                s = env.step(Action.ACCELERATE)
             }
             else if (keys.a) {
-                env.step(Action.LEFT_TURN)
+                s = env.step(Action.LEFT_TURN)
             }
             else if (keys.s) {
-                env.step(Action.BREAK)
+                s = env.step(Action.BREAK)
             }
             else if (keys.d) {
-                env.step(Action.RIGHT_TURN)
+                s = env.step(Action.RIGHT_TURN)
             }
             else {
-                env.step(undefined as unknown as Action);
+                s = env.step(undefined as unknown as Action);
             }
+            if (s.terminated) {
+                this.t.stop();
+                this.t.destroy();
+            }
+        })
+        this.t.start();
+    }
+
+    static onKD = (e: any) => {
+        switch (e.key) {
+            case 'w':
+                keys.w = true;
+                break;
+            case 'a':
+                keys.a = true;
+                break;
+            case 's':
+                keys.s = true;
+                break;
+            case 'd':
+                keys.d = true;
+                break;
         }
-        )
+    }
+    static onKU = (e: any) => {
+        switch (e.key) {
+            case 'w':
+                keys.w = false;
+                break;
+            case 'a':
+                keys.a = false;
+                break;
+            case 's':
+                keys.s = false;
+                break;
+            case 'd':
+                keys.d = false;
+                break;
+        }
     }
     private static addListeners() {
-        document.addEventListener('keydown', (e) => {
-            switch (e.key) {
-                case 'w':
-                    keys.w = true;
-                    break;
-                case 'a':
-                    keys.a = true;
-                    break;
-                case 's':
-                    keys.s = true;
-                    break;
-                case 'd':
-                    keys.d = true;
-                    break;
-            }
-        });
+        document.addEventListener('keydown', this.onKD);
+        document.addEventListener('keyup', this.onKU);
 
-        document.addEventListener('keyup', (e) => {
-            switch (e.key) {
-                case 'w':
-                    keys.w = false;
-                    break;
-                case 'a':
-                    keys.a = false;
-                    break;
-                case 's':
-                    keys.s = false;
-                    break;
-                case 'd':
-                    keys.d = false;
-                    break;
-            }
-        });
-
+    }
+    private static removeListeners() {
+        document.removeEventListener('keydown', this.onKD);
+        document.removeEventListener('keyup', this.onKU);
     }
 }

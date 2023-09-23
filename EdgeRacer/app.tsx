@@ -74,9 +74,7 @@ function buildapp() {
                 alert('Please Place a Start and Finish Position First!');
                 return;
             }            
-            env.reset();
-            ManualControl.runLoop(app,env);
-            
+            ManualControl.runLoop(env);
         });
     })();
 }

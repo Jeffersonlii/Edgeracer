@@ -90,7 +90,8 @@ export class GameEnvironment {
     // next step, should be called once per frame as each frame represents a step in the Q learning process
     step(action: Action): {
         state: QState,
-        reward: number
+        reward: number,
+        terminated: boolean
     } {
         if (!this.currentState) {
             throw new Error('Please Call env.reset() to instantiated game');
@@ -126,12 +127,13 @@ export class GameEnvironment {
 
         // ----- calculate reward -----
         // note : this.currentState is s prime as we just updated it
-        let { reward, terminal } = this.reward(this.currentState);
+        let { reward, isTerminal } = this.reward(this.currentState);
 
         // return new state and reward
         return {
             state: this.currentState,
-            reward
+            reward,
+            terminated : isTerminal
         };
     }
 
@@ -142,8 +144,10 @@ export class GameEnvironment {
     //
     // we take s prime instead of s as we must know the resultant state before 
     // we understand the consequences of (s,a), only then can we decide on the reward
+    // also return isTerminal, denoting if the reward indicates the termination of the game
+    //  (ex. car reached goal...)
     private reward(statePrime: EnvState): {
-        reward: number, terminal: boolean
+        reward: number, isTerminal: boolean
     } {
         if (!this.currentState) {
             throw new Error('Please Call env.reset() to instantiated game');
@@ -158,24 +162,29 @@ export class GameEnvironment {
             console.error("collided!!", this.currentState)
 
             // -100 reward for collisions! 
-            return { reward: -100, terminal: true }
+            return { reward: -100, isTerminal: true }
         }
 
         // if goal has been reached, reward 100! 
         if (positionIsWithinDisplayObj(statePrime.goalPosition, car)) {
             console.info("goal Reached!", this.currentState)
 
-            return { reward: 100, terminal: true }
+            return { reward: 100, isTerminal: true }
         }
 
         // return -5 reward for nothing happening 
-        return { reward: 100, terminal: false };
+        return { reward: 100, isTerminal: false };
     }
-
+    // return the new velocity, angle and turning rate of the car 
+    // after the action has been applied on the parameters
     private computeNewTelemetry(action: Action,
         velocity: number,
         angle: number,
-        turningRate: number) {
+        turningRate: number): {
+            velocity: number,
+            angle: number,
+            turningRate:number
+        } {
         let accel = 0;
 
         // 'return to zero' on no action
@@ -251,6 +260,7 @@ export class GameEnvironment {
         this.currentState.carCont.y = pos.y;
         this.currentState.carCont.angle = angle;
     }
+
     private getWallDeltasToAgent(carCont: Container, wallsCords: WallCoordinate[]) {
         //remove all debugs
         this.app.stage.children.filter(child => child.name === 'debug')
@@ -309,6 +319,7 @@ export class GameEnvironment {
             rightfrontDelta: closestRight,
         };
     }
+    // return the new position after moving at velocity and angle after 1 frame
     private calcPositionAfterMoving(
         initialPosition: Position,
         angle: number, // in degrees
@@ -371,7 +382,6 @@ export class GameEnvironment {
 
         this.app.stage.addChild(debug);
     }
-
     // Return if any walls represented by wallCoords collides with dobj
     // collision is detected by if any of the 4 borders of dobj intersect with any wall line
     private isCollidingWithWall(
