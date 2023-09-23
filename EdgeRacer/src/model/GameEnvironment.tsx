@@ -77,7 +77,7 @@ export class GameEnvironment {
 
         this.app.stage.addChild(carCont);
 
-        return this.currentState;
+        return this.envStateToQState(this.currentState);
     }
 
     destroy() {
@@ -89,7 +89,7 @@ export class GameEnvironment {
 
     // next step, should be called once per frame as each frame represents a step in the Q learning process
     step(action: Action): {
-        state: QState,
+        sPrime: QState,
         reward: number,
         terminated: boolean
     } {
@@ -131,7 +131,7 @@ export class GameEnvironment {
 
         // return new state and reward
         return {
-            state: this.currentState,
+            sPrime: this.envStateToQState(this.currentState),
             reward,
             terminated : isTerminal
         };
@@ -159,21 +159,21 @@ export class GameEnvironment {
         // check for collision
         let collided = this.isCollidingWithWall(this.bc.getAllWallPos(), car)
         if (collided) {
-            console.error("collided!!", this.currentState)
+            console.info("collided!!", this.currentState)
 
-            // -100 reward for collisions! 
-            return { reward: -100, isTerminal: true }
+            // -500000 reward for collisions! 
+            return { reward: -3000, isTerminal: true }
         }
 
-        // if goal has been reached, reward 100! 
+        // if goal has been reached, reward 100000! 
         if (positionIsWithinDisplayObj(statePrime.goalPosition, car)) {
             console.info("goal Reached!", this.currentState)
 
-            return { reward: 100, isTerminal: true }
+            return { reward: 3000, isTerminal: true }
         }
 
-        // return -5 reward for nothing happening 
-        return { reward: 100, isTerminal: false };
+        // return -1 reward for nothing happening 
+        return { reward: -1, isTerminal: false };
     }
     // return the new velocity, angle and turning rate of the car 
     // after the action has been applied on the parameters
@@ -212,36 +212,27 @@ export class GameEnvironment {
         // handle actiopns
         switch (action) {
             case Action.ACCELERATE: {
-                console.log("Accelerating...");
                 accel = topAcceleration;
             }
                 break;
             case Action.BREAK: {
-                console.log("Breaking...");
                 accel = -accelUnderBreaking;
             }
                 break;
             case Action.LEFT_TURN:
-                console.log("Turning left...");
                 turningRate = clamp(turningRate - turnAccel, -maxTurnRate, maxTurnRate);
                 break;
             case Action.RIGHT_TURN:
-                console.log("Turning right...");
                 turningRate = clamp(turningRate + turnAccel, -maxTurnRate, maxTurnRate);
                 break;
             case Action.ACCEL_LEFT:
-                console.log("Accelerating and turning left...");
                 accel = topAcceleration;
                 turningRate = clamp(turningRate - turnAccel, -maxTurnRate, maxTurnRate);
                 break;
             case Action.ACCEL_RIGHT:
-                console.log("Accelerating and turning right...");
                 accel = topAcceleration;
                 turningRate = clamp(turningRate + turnAccel, -maxTurnRate, maxTurnRate);
                 break;
-            default: {
-                console.log("No Input");
-            }
         }
         return {
             velocity: clamp(velocity + accel, 0, topVelo),
@@ -408,5 +399,16 @@ export class GameEnvironment {
                     bottomLeft, topLeft,
                     startPos, endPos)
         })
+    }
+
+    private envStateToQState(s: EnvState): QState{
+        return {
+            frontDelta: s.frontDelta,
+            leftfrontDelta: s.leftfrontDelta,
+            rightfrontDelta: s.rightfrontDelta,
+            goalDelta: s.goalDelta,
+            angle: s.angle,
+            velocity: s.velocity,
+        }
     }
 }

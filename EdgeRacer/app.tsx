@@ -6,6 +6,7 @@ import { FinishGoal } from './src/finishGoal';
 import { StartingGoal } from './src/startingGoal'; 
 import { GameEnvironment } from './src/model/gameEnvironment';
 import { ManualControl } from './src/model/manualControl';
+import { DQL } from './src/model/DQL';
 
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
@@ -74,7 +75,19 @@ function buildapp() {
                 alert('Please Place a Start and Finish Position First!');
                 return;
             }            
-            ManualControl.runLoop(env);
+            // ManualControl.runLoop(env);
+
+            let dql = new DQL({
+                targetSyncFrequency: 100,
+                numberOfEpisodes: 1000,
+                maxStepCount: 1000,
+                discountRate: 0.7,
+                explorationRate: 0.8,
+                explorationDecayRate: 0.00001,
+                minExplorationRate: 0.1,
+            });
+            dql.train(env);
+
         });
     })();
 }
