@@ -10,6 +10,7 @@ export interface dqlParameters {
     numberOfEpisodes: number;
     maxStepCount: number;
     discountRate: number;
+    learningRate: number;
     explorationRate: number;
     explorationDecayRate: number;
     minExplorationRate: number;
@@ -28,13 +29,9 @@ export class DQL {
     }
 
     async train(env: GameEnvironment) {
-        // const gameTicker = new Ticker();
-        // gameTicker.maxFPS = 60;
-        // console.log("fps : " + gameTicker.FPS);
-
         for (let episode = 0; episode < this.params.numberOfEpisodes; episode++) {
             const gameTicker = new Ticker();
-            // gameTicker.maxFPS = 60;
+            gameTicker.maxFPS = 999;
             console.info("fps : " + gameTicker.FPS);
 
             // do training
@@ -54,16 +51,13 @@ export class DQL {
                         action = Math.floor(Math.random() * ACTION_SIZE);
                     } else {
                         // exploit time ! use NN to find the best action
-                        let input: number[] = Object.values(s);
-                        let output = this.policyNetwork.predict(tf.tensor2d(input, [1, 6]))
-                        console.log(input, output)
-                        // action = tf.argMax(output, 0);
-                        action = 0
+                        action = this.predictAction(this.policyNetwork, s);
                     }
                     let { sPrime, reward, terminated } = env.step(action);
 
-                    // 
-                    // this.policyNetwork.fit
+
+                    // ----- 
+
                     // ----- updates ----
                     rewardCount += reward
                     s = sPrime; // update state
@@ -81,9 +75,13 @@ export class DQL {
             })
         }
     }
-
-
     // ------ pure function -------
+
+    private predictAction(nn: tf.Sequential, state: QState){
+        let input: number[] = Object.values(state);
+        let output = tf.tidy(()=>nn.predict(tf.tensor2d(input, [1, 6]))) 
+        return tf.argMax((output as tf.Tensor), 1).dataSync()[0];
+    }
 
     // create a Neural Net used for DQL
     private createNN(params: dqlParameters) {
@@ -93,19 +91,19 @@ export class DQL {
         nn.add(
             tf.layers.dense({
                 inputShape: [STATE_SIZE],
-                units: 128,
+                units: 36,
                 activation: "relu",
             })
         )
         nn.add(
             tf.layers.dense({
-                units: 64,
+                units: 24,
                 activation: "relu",
             })
         )
         nn.add(
             tf.layers.dense({
-                units: 128,
+                units: 36,
                 activation: "relu",
             })
         )
@@ -118,10 +116,13 @@ export class DQL {
             })
         )
         nn.compile({
-            optimizer: tf.train.rmsprop(2e-3),
+            optimizer: tf.train.adam(this.params.learningRate),
             loss: this.loss,
             metrics: ['accuracy']
         })
+
+        console.log(nn.summary())
+
         return nn;
     }
 

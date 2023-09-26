@@ -82,7 +82,9 @@ function buildapp() {
                 numberOfEpisodes: 1000,
                 maxStepCount: 1000,
                 discountRate: 0.7,
-                explorationRate: 0.8,
+                learningRate: 0.5,
+                // explorationRate: 0.8,
+                explorationRate: 0.1,
                 explorationDecayRate: 0.00001,
                 minExplorationRate: 0.1,
             });

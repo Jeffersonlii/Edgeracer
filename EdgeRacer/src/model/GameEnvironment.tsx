@@ -1,7 +1,7 @@
 import { Application, Container, DisplayObject, Graphics, Point } from "pixi.js";
 import { Action, QState, EnvState } from "./envModels";
 import { Building, Wall, WallCoordinate } from "../building";
-import { Position, calcDist, calcVelocity, clamp, iPointDataToPosition, intersectionOfSegments, positionIsWithinDisplayObj } from "../mathHelpers";
+import { Position, calcDist, clamp, iPointDataToPosition, intersectionOfSegments, positionIsWithinDisplayObj } from "../mathHelpers";
 import { StartingGoal } from "../startingGoal";
 import { FinishGoal } from "../finishGoal";
 
@@ -62,6 +62,7 @@ export class GameEnvironment {
         let carCont = this.setupNewCar(startingPosition);
 
         // init current state
+        this.initialDeltaToGoal = calcDist(startingPosition, this.fgc.getPosition());
         this.currentState = {
             ...this.getWallDeltasToAgent(carCont, this.wallsCords),
             goalDelta: this.initialDeltaToGoal,
@@ -72,12 +73,11 @@ export class GameEnvironment {
             carCont: carCont,
             goalPosition: this.fgc.getPosition()
         }
-        this.initialDeltaToGoal = calcDist(startingPosition, this.currentState.goalPosition);
 
 
         this.app.stage.addChild(carCont);
 
-        return this.envStateToQState(this.currentState);
+        return this.normalizeQState(this.currentState);
     }
 
     destroy() {
@@ -131,7 +131,7 @@ export class GameEnvironment {
 
         // return new state and reward
         return {
-            sPrime: this.envStateToQState(this.currentState),
+            sPrime: this.normalizeQState(this.currentState),
             reward,
             terminated : isTerminal
         };
@@ -401,14 +401,20 @@ export class GameEnvironment {
         })
     }
 
-    private envStateToQState(s: EnvState): QState{
+
+    private normalizeQState(s: EnvState): QState{
+       let normalizedAngle = s.angle % 360;
+        if(normalizedAngle < 0){
+            normalizedAngle += 360
+        }
+
         return {
-            frontDelta: s.frontDelta,
-            leftfrontDelta: s.leftfrontDelta,
-            rightfrontDelta: s.rightfrontDelta,
-            goalDelta: s.goalDelta,
-            angle: s.angle,
-            velocity: s.velocity,
+            frontDelta: s.frontDelta / maxEyeDist,
+            leftfrontDelta: s.leftfrontDelta / maxEyeDist,
+            rightfrontDelta: s.rightfrontDelta / maxEyeDist,
+            goalDelta: s.goalDelta / this.initialDeltaToGoal,
+            angle: normalizedAngle / 360 ,
+            velocity: s.velocity / topVelo,
         }
     }
 }
