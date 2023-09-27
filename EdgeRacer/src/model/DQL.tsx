@@ -6,7 +6,9 @@ import { ACTION_SIZE, Action, QState, STATE_SIZE } from "./envModels";
 
 //https://www.analyticsvidhya.com/blog/2019/04/introduction-deep-q-learning-python/
 export interface dqlParameters {
-    targetSyncFrequency: number;
+    replayArraySize: number;
+    replayBatchSize: number;
+    targetSyncFrequency: number; // in steps
     numberOfEpisodes: number;
     maxStepCount: number;
     discountRate: number;
@@ -25,10 +27,16 @@ export class DQL {
         // ------- define networks -------
         this.policyNetwork = this.createNN(params);
         this.targetNetwork = this.createNN(params);
+
+        // not trainable by optimizer, weights are only updated via sync
+        this.targetNetwork.trainable = false; 
+
         this.params = params;
     }
 
     async train(env: GameEnvironment) {
+        let totalSteps = 0;
+
         for (let episode = 0; episode < this.params.numberOfEpisodes; episode++) {
             const gameTicker = new Ticker();
             gameTicker.maxFPS = 999;
@@ -41,10 +49,22 @@ export class DQL {
                 let step = 0
                 let exploreRate = this.params.explorationRate;
 
+                // fill up replay memory
+                let replayMemory: { sPrime: QState; reward: number; terminated: boolean; s: QState; a: Action; }[] = [];
+                for (let i = 0; i < this.params.replayArraySize; i++) {
+                    let a = Math.floor(Math.random() * ACTION_SIZE);
+                    replayMemory.push({ s, a, ...env.step(a) })
+                }
+
                 gameTicker.add(() => {
+                    totalSteps++;
                     step++;
 
-                    // ---- get action -----
+                    // ---- train on batch ------ 
+                    // todo
+
+                    // ---- progress game by taking action ------
+                    // get action 
                     let action: Action;
                     if (Math.random() < exploreRate) {
                         // explore time ! pick a random action
@@ -54,9 +74,9 @@ export class DQL {
                         action = this.predictAction(this.policyNetwork, s);
                     }
                     let { sPrime, reward, terminated } = env.step(action);
-
-
-                    // ----- 
+                    // fifo replay memory
+                    replayMemory.shift();
+                    replayMemory.push({ s, a: action, sPrime, reward, terminated })
 
                     // ----- updates ----
                     rewardCount += reward
@@ -65,6 +85,10 @@ export class DQL {
                         this.params.minExplorationRate,
                         exploreRate - this.params.explorationDecayRate);
 
+                    // ----- sync networks ------
+                    if (totalSteps % this.params.targetSyncFrequency === 0){
+                        this.syncModel(this.policyNetwork, this.targetNetwork);
+                    }
                     if (terminated || step > this.params.maxStepCount) {
                         console.info(`Concluded episode ${episode} : reward = ${rewardCount}`)
                         gameTicker.destroy();
@@ -77,9 +101,9 @@ export class DQL {
     }
     // ------ pure function -------
 
-    private predictAction(nn: tf.Sequential, state: QState){
+    private predictAction(nn: tf.Sequential, state: QState) {
         let input: number[] = Object.values(state);
-        let output = tf.tidy(()=>nn.predict(tf.tensor2d(input, [1, 6]))) 
+        let output = tf.tidy(() => nn.predict(tf.tensor2d(input, [1, 6])))
         return tf.argMax((output as tf.Tensor), 1).dataSync()[0];
     }
 
@@ -122,6 +146,8 @@ export class DQL {
         })
 
         console.log(nn.summary())
+
+        
 
         return nn;
     }

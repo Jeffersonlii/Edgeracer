@@ -78,6 +78,8 @@ function buildapp() {
             // ManualControl.runLoop(env);
 
             let dql = new DQL({
+                replayArraySize: 30,
+                replayBatchSize: 5,
                 targetSyncFrequency: 100,
                 numberOfEpisodes: 1000,
                 maxStepCount: 1000,
