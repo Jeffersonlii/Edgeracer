@@ -1,14 +1,14 @@
 import { Container } from "pixi.js";
 import { Position } from "../mathHelpers";
 
-export const ACTION_SIZE = 6; 
+export const ACTION_SIZE = 5; 
 export enum Action{
-    ACCELERATE = 0,
-    BREAK = 1,
-    LEFT_TURN = 2,
-    RIGHT_TURN = 3,
-    ACCEL_LEFT = 4,
-    ACCEL_RIGHT = 5,
+    ACCELERATE,
+    // BREAK = 1,
+    LEFT_TURN,
+    RIGHT_TURN,
+    ACCEL_LEFT,
+    ACCEL_RIGHT,
 };
 
 // the State input fed to the Policy Network

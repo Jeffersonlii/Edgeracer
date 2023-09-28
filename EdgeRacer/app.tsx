@@ -7,6 +7,7 @@ import { StartingGoal } from './src/startingGoal';
 import { GameEnvironment } from './src/model/gameEnvironment';
 import { ManualControl } from './src/model/manualControl';
 import { DQL } from './src/model/DQL';
+import { Agent } from './src/model/agent';
 
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
@@ -78,19 +79,22 @@ function buildapp() {
             // ManualControl.runLoop(env);
 
             let dql = new DQL({
-                replayMemorySize: 30,
                 replayBatchSize: 10,
                 targetSyncFrequency: 100,
                 numberOfEpisodes: 1000,
                 maxStepCount: 5000,
                 discountRate: 0.7,
                 learningRate: 0.5,
-                explorationRate: 0.8,
-                // explorationRate: 0.1,
-                explorationDecayRate: 0.00001,
-                minExplorationRate: 0.1,
+
             });
-            dql.train(env);
+            let agent = new Agent(env, {
+                replayMemorySize: 30,
+                explorationRate: 1,
+                // explorationRate: 0.1,
+                explorationDecayRate: 0.001,
+                minExplorationRate: 0.1,
+            })
+            dql.train(agent);
 
         });
     })();

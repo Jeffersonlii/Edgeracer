@@ -34,4 +34,11 @@ export class ReplayMemory {
     sample(batchSize: number): InternalMemory[] {
         return getRandomSubarray(this.storage, batchSize);
     }
+
+    clear(){
+        this.storage.forEach((m)=>{
+            tf.dispose(m)
+        })
+        this.storage = []
+    }
 }

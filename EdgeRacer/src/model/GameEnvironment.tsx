@@ -173,7 +173,7 @@ export class GameEnvironment {
         }
 
         // return -1 reward for nothing happening 
-        return { reward: -1, isTerminal: false };
+        return { reward: 1, isTerminal: false };
     }
     // return the new velocity, angle and turning rate of the car 
     // after the action has been applied on the parameters
@@ -215,10 +215,12 @@ export class GameEnvironment {
                 accel = topAcceleration;
             }
                 break;
-            case Action.BREAK: {
-                accel = -accelUnderBreaking;
-            }
-                break;
+            // case Action.BREAK: {
+            //     accel = -accelUnderBreaking;
+            //     // accel = topAcceleration;
+
+            // }
+            //     break;
             case Action.LEFT_TURN:
                 turningRate = clamp(turningRate - turnAccel, -maxTurnRate, maxTurnRate);
                 break;
