@@ -78,15 +78,15 @@ function buildapp() {
             // ManualControl.runLoop(env);
 
             let dql = new DQL({
-                replayArraySize: 30,
-                replayBatchSize: 5,
+                replayMemorySize: 30,
+                replayBatchSize: 10,
                 targetSyncFrequency: 100,
                 numberOfEpisodes: 1000,
-                maxStepCount: 1000,
+                maxStepCount: 5000,
                 discountRate: 0.7,
                 learningRate: 0.5,
-                // explorationRate: 0.8,
-                explorationRate: 0.1,
+                explorationRate: 0.8,
+                // explorationRate: 0.1,
                 explorationDecayRate: 0.00001,
                 minExplorationRate: 0.1,
             });
