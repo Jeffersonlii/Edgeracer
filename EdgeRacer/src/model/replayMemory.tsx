@@ -1,5 +1,5 @@
 import { getRandomSubarray } from "../mathHelpers";
-import { ACTION_SIZE, Action, QState, STATE_SIZE } from "./envModels";
+import { ACTION_SIZE, Action, QState, STATE_SIZE } from "../game/envModels";
 import * as tf from '@tensorflow/tfjs';
 
 export type Memory = {

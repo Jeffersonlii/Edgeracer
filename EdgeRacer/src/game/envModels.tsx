@@ -1,10 +1,10 @@
 import { Container } from "pixi.js";
 import { Position } from "../mathHelpers";
 
-export const ACTION_SIZE = 5; 
+export const ACTION_SIZE = 6; 
 export enum Action{
     ACCELERATE,
-    // BREAK = 1,
+    BREAK,
     LEFT_TURN,
     RIGHT_TURN,
     ACCEL_LEFT,

@@ -1,6 +1,6 @@
 import { State, Ticker } from "pixi.js";
 import * as tf from '@tensorflow/tfjs';
-import { ACTION_SIZE, Action, QState, STATE_SIZE } from "./envModels";
+import { ACTION_SIZE, Action, QState, STATE_SIZE } from "../game/envModels";
 import { ReplayMemory } from "./replayMemory";
 import { Agent } from "./agent";
 
@@ -33,12 +33,12 @@ export class DQL {
     }
 
     async train(agent: Agent) {
+        let rewards: number[] = []
 
         let totalSteps = 0;
 
         for (let episode = 0; episode < this.params.numberOfEpisodes; episode++) {
             const gameTicker = new Ticker();
-            console.info(`fps : ${gameTicker.FPS}`);
 
             // do training
             await new Promise((resolve) => {
@@ -60,14 +60,15 @@ export class DQL {
                     this.optimizeOnReplayBatch(agent.getMemory(), optimizer)
 
                     // ---- progress game by taking action ------
-                    let { cumAward, terminated }= agent.playStep(this.policyNetwork);
+                    let { cumReward, terminated }= agent.playStep(this.policyNetwork);
 
                     // ----- sync networks ------
                     if (totalSteps % this.params.targetSyncFrequency === 0) {
                         this.syncModel(this.policyNetwork, this.targetNetwork);
                     }
                     if (terminated || step > this.params.maxStepCount) {
-                        console.info(`Concluded episode ${episode} : reward = ${cumAward}`)
+                        rewards.push(cumReward);
+                        console.info(`Concluded episode ${episode} : reward = ${cumReward}`)
                         gameTicker.destroy();
                         resolve('resolved');
                     }
@@ -75,6 +76,7 @@ export class DQL {
                 gameTicker.start();
             })
         }
+        return rewards;
     }
 
     private optimizeOnReplayBatch(replayMemories: ReplayMemory, optimizer: tf.Optimizer) {

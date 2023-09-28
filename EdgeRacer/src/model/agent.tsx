@@ -1,5 +1,5 @@
-import { ACTION_SIZE, Action, QState, STATE_SIZE } from "./envModels";
-import { GameEnvironment } from "./gameEnvironment";
+import { ACTION_SIZE, Action, QState, STATE_SIZE } from "../game/envModels";
+import { GameEnvironment } from "../game/gameEnvironment";
 import * as tf from '@tensorflow/tfjs';
 import { ReplayMemory } from "./replayMemory";
 
@@ -55,11 +55,11 @@ export class Agent {
             this.params.minExplorationRate,
             this.curExploreRate - this.params.explorationDecayRate);
 
-        if(terminated){
-            console.log(this.curExploreRate)
-        }
+        // if(terminated){
+        //     console.log(this.curExploreRate)
+        // }
 
-        return { cumAward: this.rewardCount, terminated }
+        return { cumReward: this.rewardCount, terminated }
     }
 
     getMemory(){

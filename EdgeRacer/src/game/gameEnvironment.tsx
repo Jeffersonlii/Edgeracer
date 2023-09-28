@@ -74,7 +74,6 @@ export class GameEnvironment {
             goalPosition: this.fgc.getPosition()
         }
 
-
         this.app.stage.addChild(carCont);
 
         return this.normalizeQState(this.currentState);
@@ -153,13 +152,14 @@ export class GameEnvironment {
             throw new Error('Please Call env.reset() to instantiated game');
         }
 
+        // ------- terminals -------
         // todo : plenty of room for optimization! 
         // walls can be preprossed to be sorted into hashtables based of collision sectors
         let car = statePrime.carCont.children.filter(c => c.name === carName)[0];
         // check for collision
         let collided = this.isCollidingWithWall(this.bc.getAllWallPos(), car)
         if (collided) {
-            console.info("collided!!", this.currentState)
+            // console.info("collided!!", this.currentState)
 
             // -500000 reward for collisions! 
             return { reward: -3000, isTerminal: true }
@@ -167,13 +167,16 @@ export class GameEnvironment {
 
         // if goal has been reached, reward 100000! 
         if (positionIsWithinDisplayObj(statePrime.goalPosition, car)) {
-            console.info("goal Reached!", this.currentState)
+            // console.info("goal Reached!", this.currentState)
 
             return { reward: 3000, isTerminal: true }
         }
 
-        // return -1 reward for nothing happening 
-        return { reward: 1, isTerminal: false };
+        let reward = -1;
+        reward += statePrime.velocity;
+
+
+        return { reward, isTerminal: false };
     }
     // return the new velocity, angle and turning rate of the car 
     // after the action has been applied on the parameters
@@ -215,12 +218,10 @@ export class GameEnvironment {
                 accel = topAcceleration;
             }
                 break;
-            // case Action.BREAK: {
-            //     accel = -accelUnderBreaking;
-            //     // accel = topAcceleration;
-
-            // }
-            //     break;
+            case Action.BREAK: {
+                accel = -accelUnderBreaking;
+            }
+                break;
             case Action.LEFT_TURN:
                 turningRate = clamp(turningRate - turnAccel, -maxTurnRate, maxTurnRate);
                 break;

@@ -4,8 +4,8 @@ import { Controls } from './src/controls';
 import { Eraser } from './src/eraser';
 import { FinishGoal } from './src/finishGoal';
 import { StartingGoal } from './src/startingGoal'; 
-import { GameEnvironment } from './src/model/gameEnvironment';
-import { ManualControl } from './src/model/manualControl';
+import { GameEnvironment } from './src/game/gameEnvironment';
+import { ManualControl } from './src/game/manualControl';
 import { DQL } from './src/model/DQL';
 import { Agent } from './src/model/agent';
 
@@ -69,7 +69,7 @@ function buildapp() {
             buildingComponent.createBorderWalls();
         });
 
-        document.getElementById('trainButton')?.addEventListener('click', () => {
+        document.getElementById('trainButton')?.addEventListener('click', async () => {
             // add an Agent to begin training
 
             if(!(sgoalsComponent.exists() && fgoalsComponent.exists())){
@@ -82,7 +82,7 @@ function buildapp() {
                 replayBatchSize: 10,
                 targetSyncFrequency: 100,
                 numberOfEpisodes: 1000,
-                maxStepCount: 5000,
+                maxStepCount: 1000,
                 discountRate: 0.7,
                 learningRate: 0.5,
 
@@ -94,8 +94,8 @@ function buildapp() {
                 explorationDecayRate: 0.001,
                 minExplorationRate: 0.1,
             })
-            dql.train(agent);
-
+            const rewards = await dql.train(agent);
+            console.log(rewards)
         });
     })();
 }
