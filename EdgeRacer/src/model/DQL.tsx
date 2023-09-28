@@ -34,11 +34,12 @@ export class DQL {
 
     async train(agent: Agent) {
         let rewards: number[] = []
-
         let totalSteps = 0;
 
         for (let episode = 0; episode < this.params.numberOfEpisodes; episode++) {
             const gameTicker = new Ticker();
+            gameTicker.maxFPS = 999
+            console.log(gameTicker.FPS)
 
             // do training
             await new Promise((resolve) => {

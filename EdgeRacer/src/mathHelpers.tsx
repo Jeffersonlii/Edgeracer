@@ -40,30 +40,8 @@ export function calcDist(point1: Position, point2: Position) {
   );
 }
 
-export function iPointDataToPosition(d: IPointData): Position {
-  return {
-    x: d.x,
-    y: d.y
-  }
-}
-
 export function clamp(number: number, lowerBound: number, upperBound: number) {
   return Math.max(lowerBound, Math.min(number, upperBound));
-}
-
-// if position is within the bounds of the displayobject
-export function positionIsWithinDisplayObj(pos: Position, dobj: DisplayObject) {
-  // Get the global bounds of the displayObject
-  let { x, y } = pos;
-  const bounds = dobj.getBounds();
-
-  // Check if the point {x, y} is within the bounds
-  return (
-      x >= bounds.x &&
-      x <= bounds.x + bounds.width &&
-      y >= bounds.y &&
-      y <= bounds.y + bounds.height
-  );
 }
 
 export function getRandomSubarray(arr: any[], size: number) {
@@ -75,4 +53,14 @@ export function getRandomSubarray(arr: any[], size: number) {
       shuffled[i] = temp;
   }
   return shuffled.slice(min);
+}
+
+export function positionOfFacing(pos: Position, angle : number, distance: number){
+  return{
+    x: pos.x + distance * Math.cos(toRad(angle)),
+    y: pos.y + distance * Math.sin(toRad(angle))
+  }
+}
+export function toRad(degree: number){
+  return degree * (Math.PI / 180);
 }

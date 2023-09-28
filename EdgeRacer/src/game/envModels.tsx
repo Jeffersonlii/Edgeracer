@@ -27,6 +27,5 @@ export interface QState {
 export interface EnvState extends QState{
     position : Position; // position of car
     turningRate: number; // turning acceleration of car
-    carCont: Container; // car container of game
     goalPosition: Position; // position of game goal
 }
