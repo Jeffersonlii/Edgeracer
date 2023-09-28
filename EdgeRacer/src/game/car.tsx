@@ -15,6 +15,7 @@ export class Car {
     private initialState: InitialState;
     private carCont: Container<DisplayObject> | undefined;
     private name: string;
+    private id: number;
 
     constructor(app: Application<HTMLCanvasElement>,
         initialState: InitialState,
@@ -22,6 +23,10 @@ export class Car {
         this.app = app;
         this.initialState = initialState;
         this.name = `${carContName}${id}`;
+        this.id = id;
+    }
+    getId(){
+        return this.id;
     }
 
     addCarToScene() {

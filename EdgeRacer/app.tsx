@@ -80,37 +80,35 @@ function buildapp() {
 
             let dql = new DQL({
                 replayBatchSize: 10,
-                targetSyncFrequency: 100,
-                numberOfEpisodes: 1000,
+                targetSyncFrequency: 500,
+                numberOfEpisodes: 100,
                 maxStepCount: 1000,
                 discountRate: 0.8,
                 learningRate: 0.8,
-
             });
             let agent = new Agent(env, {
                 replayMemorySize: 30,
                 explorationRate: 1,
                 // explorationRate: 0.1,
-                explorationDecayRate: 0.001,
+                explorationDecayRate: 0.0005,
                 minExplorationRate: 0.1,
             })
 
-
             // add car to scene and set up graphics loop
             let car = new Car(app, {
-                pos: {x: 0, y:0},
+                pos: { x: 0, y: 0 },
                 angle: 0,
                 width: carWidth,
                 height: carHeight
             }, 1);
             car.addCarToScene();
-            const gameTicker = new Ticker();
-            gameTicker.maxFPS = 30;
-            gameTicker.add(() => {
+            const animationTicker = new Ticker();
+            animationTicker.add(() => {
                 let s = env.getCarState();
                 car.updateCarPosition(s.position ?? {x:0,y:0}, s.angle ?? 0)
             })
-            gameTicker.start();
+            animationTicker.start();
+            console.log(animationTicker.FPS)
 
             const rewards = await dql.train(agent);
             console.log(rewards)

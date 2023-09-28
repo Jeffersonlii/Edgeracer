@@ -95,8 +95,6 @@ export class GameEnvironment {
             turningRate: turningRate,
         }
 
-
-
         // ----- calculate reward -----
         // note : this.currentState is s prime as we just updated it
         let { reward, isTerminal } = this.reward(this.currentState);
@@ -144,8 +142,8 @@ export class GameEnvironment {
             return { reward: 3000, isTerminal: true }
         }
 
-        let reward = -1;
-        reward += statePrime.velocity;
+        let reward = -5;
+        reward += statePrime.velocity*5;
 
 
         return { reward, isTerminal: false };
@@ -218,14 +216,6 @@ export class GameEnvironment {
     }
 
     private getWallDeltasToAgent(agentPosition: Position, agentAngle: number, wallsCords: WallCoordinate[]) {
-        //remove all debugs
-        // this.app.stage.children.filter(child => child.name === 'debug')
-        //     .forEach(deb => {
-        //         this.app.stage.removeChild(deb);
-        //         deb.destroy();
-        //     });
-
-
         let eyesEnds = {
             left: positionOfFacing(agentPosition, agentAngle - 45, maxEyeDist),
             center: positionOfFacing(agentPosition, agentAngle, maxEyeDist),
@@ -243,8 +233,6 @@ export class GameEnvironment {
             let frontCollisionPoint = intersectionOfSegments(agentPosition, eyesEnds.center,
                 wall.startPos, wall.endPos)
             if (frontCollisionPoint) { // if there is a collision
-                // this.paintDebug(frontCollisionPoint.x, frontCollisionPoint.y);
-
                 let distToWall = calcDist(agentPosition, frontCollisionPoint);
                 closestFront = Math.min(closestFront, distToWall);
             }
@@ -253,8 +241,6 @@ export class GameEnvironment {
             let leftCollisionPoint = intersectionOfSegments(agentPosition, eyesEnds.left,
                 wall.startPos, wall.endPos)
             if (leftCollisionPoint) { // if there is a collision
-                // this.paintDebug(leftCollisionPoint.x, leftCollisionPoint.y);
-
                 let distToWall = calcDist(agentPosition, leftCollisionPoint);
                 closestLeft = Math.min(closestLeft, distToWall);
             }
@@ -263,8 +249,6 @@ export class GameEnvironment {
             let rightCollisionPoint = intersectionOfSegments(agentPosition, eyesEnds.right,
                 wall.startPos, wall.endPos)
             if (rightCollisionPoint) { // if there is a collision
-                // this.paintDebug(rightCollisionPoint.x, rightCollisionPoint.y);
-
                 let distToWall = calcDist(agentPosition, rightCollisionPoint);
                 closestRight = Math.min(closestRight, distToWall);
             }

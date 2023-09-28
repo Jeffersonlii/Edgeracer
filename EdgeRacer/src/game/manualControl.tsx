@@ -29,7 +29,7 @@ export class ManualControl {
         // ----- set up current run ------
         this.addListeners();
         const carTicker = new Ticker();
-        carTicker.maxFPS = 60;
+        carTicker.maxFPS = 999;
         console.log("fps is " + carTicker.FPS);
 
         this.t = carTicker.add(() => {

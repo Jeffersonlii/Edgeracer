@@ -55,9 +55,9 @@ export class Agent {
             this.params.minExplorationRate,
             this.curExploreRate - this.params.explorationDecayRate);
 
-        // if(terminated){
-        //     console.log(this.curExploreRate)
-        // }
+        if(terminated){
+            console.log(this.curExploreRate)
+        }
 
         return { cumReward: this.rewardCount, terminated }
     }
