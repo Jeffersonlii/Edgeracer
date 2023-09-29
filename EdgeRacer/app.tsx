@@ -79,19 +79,19 @@ function buildapp() {
             // ManualControl.runLoop(env);
 
             let dql = new DQL({
-                replayBatchSize: 10,
-                targetSyncFrequency: 500,
+                replayBatchSize: 12,
+                targetSyncFrequency: 1000,
                 numberOfEpisodes: 100,
                 maxStepCount: 1000,
-                discountRate: 0.8,
-                learningRate: 0.8,
+                discountRate: 0.9,
+                learningRate: 0.7,
             });
             let agent = new Agent(env, {
-                replayMemorySize: 30,
+                replayMemorySize: 40,
                 explorationRate: 1,
-                // explorationRate: 0.1,
-                explorationDecayRate: 0.0005,
-                minExplorationRate: 0.1,
+                // explorationRate: 0.4,
+                explorationDecayRate: 0.00005,
+                minExplorationRate: 0.2,
             })
 
             // add car to scene and set up graphics loop

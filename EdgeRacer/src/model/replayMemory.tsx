@@ -32,7 +32,8 @@ export class ReplayMemory {
     }
 
     sample(batchSize: number): InternalMemory[] {
-        return getRandomSubarray(this.storage, batchSize);
+        let size = Math.min(batchSize, this.storage.length)
+        return getRandomSubarray(this.storage, size);
     }
 
     clear(){

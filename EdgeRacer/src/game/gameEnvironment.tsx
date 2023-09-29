@@ -7,10 +7,9 @@ import { FinishGoal } from "../finishGoal";
 // ------- Car Drivability Metrics --------
 export const carWidth = 30;
 export const carHeight = 10;
-const maxEyeDist = 10000;
+const maxEyeDist = 100;
 const topVelo = 10;
 const topAcceleration = 0.1;
-const accelUnderBreaking = 0.5;
 const passiveBreaking = 0.1;
 const turnAccel = 0.3; // degrees per frame
 const maxTurnRate = 6; // degrees per frame
@@ -129,15 +128,15 @@ export class GameEnvironment {
         // check for collision
         let collided = this.isCollidingWithWall(this.bc.getAllWallPos(), statePrime.position)
         if (collided) {
-            // console.info("collided!!", this.currentState)
+            console.info("collided!!", this.currentState)
 
             // -500000 reward for collisions! 
-            return { reward: -3000, isTerminal: true }
+            return { reward: 0, isTerminal: true }
         }
 
         // if goal has been reached, reward 100000! 
         if (this.positionIsWithinCar(statePrime.goalPosition, statePrime.position)) {
-            // console.info("goal Reached!", this.currentState)
+            console.info("goal Reached!", this.currentState)
 
             return { reward: 3000, isTerminal: true }
         }
@@ -146,7 +145,7 @@ export class GameEnvironment {
         reward += statePrime.velocity*5;
 
 
-        return { reward, isTerminal: false };
+        return { reward : 1, isTerminal: false };
     }
     // return the new velocity, angle and turning rate of the car 
     // after the action has been applied on the parameters
@@ -162,7 +161,7 @@ export class GameEnvironment {
 
         // 'return to zero' on no action
         if (action !== Action.ACCEL_LEFT && action !== Action.ACCEL_RIGHT) {
-            if (action !== Action.ACCELERATE && action !== Action.BREAK) {
+            if (action !== Action.ACCELERATE) {
                 if (velocity > passiveBreaking) {
                     accel = -passiveBreaking;
                 } else {
@@ -184,13 +183,8 @@ export class GameEnvironment {
 
         // handle actiopns
         switch (action) {
-            case Action.ACCELERATE: {
+            case Action.ACCELERATE: 
                 accel = topAcceleration;
-            }
-                break;
-            case Action.BREAK: {
-                accel = -accelUnderBreaking;
-            }
                 break;
             case Action.LEFT_TURN:
                 turningRate = clamp(turningRate - turnAccel, -maxTurnRate, maxTurnRate);

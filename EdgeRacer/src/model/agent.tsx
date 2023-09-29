@@ -27,7 +27,8 @@ export class Agent {
 
     reset() {
         this.rewardCount = 0;
-        this.curExploreRate = this.params.explorationRate;
+        //todo reduce epsilon on episode
+        // this.curExploreRate = this.params.explorationRate;
         this.s = this.env.reset();
         this.replayMemories.clear()
     }
@@ -55,18 +56,17 @@ export class Agent {
             this.params.minExplorationRate,
             this.curExploreRate - this.params.explorationDecayRate);
 
-        if(terminated){
+        if (terminated) {
             console.log(this.curExploreRate)
         }
-
-        return { cumReward: this.rewardCount, terminated }
+        return { cummReward: this.rewardCount, terminated }
     }
 
-    getMemory(){
+    getMemory() {
         return this.replayMemories;
     }
 
-    getReplayMemorySize(){
+    getReplayMemorySize() {
         return this.params.replayMemorySize;
     }
 
