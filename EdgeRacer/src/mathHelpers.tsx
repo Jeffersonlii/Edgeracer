@@ -64,3 +64,9 @@ export function positionOfFacing(pos: Position, angle : number, distance: number
 export function toRad(degree: number){
   return degree * (Math.PI / 180);
 }
+
+export function angleBetween(p1: Position, p2: Position){
+  let rad = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+  let deg = rad * (180 / Math.PI); // convert to degree
+  return deg < 0 ? deg + 360 : deg
+}

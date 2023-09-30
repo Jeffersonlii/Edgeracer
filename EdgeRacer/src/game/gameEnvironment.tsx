@@ -1,6 +1,6 @@
 import { Action, QState, EnvState } from "./envModels";
 import { Building, Wall, WallCoordinate } from "../building";
-import { Position, calcDist, clamp, intersectionOfSegments, positionOfFacing } from "../mathHelpers";
+import { Position, angleBetween, calcDist, clamp, intersectionOfSegments, positionOfFacing } from "../mathHelpers";
 import { StartingGoal } from "../startingGoal";
 import { FinishGoal } from "../finishGoal";
 
@@ -48,6 +48,7 @@ export class GameEnvironment {
             goalDelta: this.initialDeltaToGoal,
             position: startingPosition,
             angle: 0,
+            angleToGoal: angleBetween(startingPosition, this.fgc.getPosition()),
             velocity: 0,
             turningRate: 0,
             goalPosition: this.fgc.getPosition()
@@ -84,10 +85,13 @@ export class GameEnvironment {
             velocity);
 
         // ----- update to new state, s prime -----
+        let angleToGoal = angleBetween(resultantPos, this.fgc.getPosition()) - angle;
+        angleToGoal = angleToGoal < 0 ? angleToGoal + 360 : 0
         this.currentState = {
             ...this.currentState,
             ...this.getWallDeltasToAgent(resultantPos, angle, this.wallsCords),
-            angle: angle,
+            angle,
+            angleToGoal: angleBetween(resultantPos, this.fgc.getPosition()) - angle,
             goalDelta: calcDist(resultantPos, this.currentState.goalPosition),
             position: resultantPos,
             velocity: velocity,
@@ -131,21 +135,21 @@ export class GameEnvironment {
             console.info("collided!!", this.currentState)
 
             // -500000 reward for collisions! 
-            return { reward: 0, isTerminal: true }
+            return { reward: -5, isTerminal: true }
         }
 
         // if goal has been reached, reward 100000! 
         if (this.positionIsWithinCar(statePrime.goalPosition, statePrime.position)) {
             console.info("goal Reached!", this.currentState)
 
-            return { reward: 3000, isTerminal: true }
+            return { reward: 30000, isTerminal: true }
         }
 
         let reward = -5;
         reward += statePrime.velocity*5;
 
 
-        return { reward : 1, isTerminal: false };
+        return { reward : reward, isTerminal: false };
     }
     // return the new velocity, angle and turning rate of the car 
     // after the action has been applied on the parameters
@@ -201,9 +205,14 @@ export class GameEnvironment {
                 turningRate = clamp(turningRate + turnAccel, -maxTurnRate, maxTurnRate);
                 break;
         }
+        let newAngle = (angle + turningRate) % 360;
+        if (newAngle < 0) {
+            newAngle += 360
+        }
+
         return {
             velocity: clamp(velocity + accel, 0, topVelo),
-            angle: angle + turningRate,
+            angle: newAngle,
             turningRate
         }
 
@@ -311,17 +320,12 @@ export class GameEnvironment {
     }
 
     private normalizeQState(s: EnvState): QState {
-        let normalizedAngle = s.angle % 360;
-        if (normalizedAngle < 0) {
-            normalizedAngle += 360
-        }
-
         return {
             frontDelta: s.frontDelta / maxEyeDist,
             leftfrontDelta: s.leftfrontDelta / maxEyeDist,
             rightfrontDelta: s.rightfrontDelta / maxEyeDist,
             goalDelta: s.goalDelta / this.initialDeltaToGoal,
-            angle: normalizedAngle / 360,
+            angleToGoal: s.angleToGoal / 360,
             velocity: s.velocity / topVelo,
         }
     }

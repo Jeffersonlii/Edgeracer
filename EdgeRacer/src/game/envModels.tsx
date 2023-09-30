@@ -17,7 +17,7 @@ export interface QState {
     leftfrontDelta: number;
     rightfrontDelta: number;
     goalDelta: number;
-    angle: number; // angle of car in degrees 
+    angleToGoal: number; // angle of car in degrees 
     velocity: number;
     // may need angle to goal
 }
@@ -25,6 +25,7 @@ export interface QState {
 // The overall State of the game, with datapoints not fed to the policy network
 export interface EnvState extends QState{
     position : Position; // position of car
+    angle: number; // angle of car in degrees 
     turningRate: number; // turning acceleration of car
     goalPosition: Position; // position of game goal
 }

@@ -3,6 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 import { ACTION_SIZE, Action, QState, STATE_SIZE } from "../game/envModels";
 import { ReplayMemory } from "./replayMemory";
 import { Agent } from "./agent";
+import {Data} from '../data/data';
 
 // Deep Q Learning
 
@@ -33,18 +34,24 @@ export class DQL {
     }
 
     async train(agent: Agent) {
+
+        const d = new Data();
+        d.reset();
+
+        agent.totallyReset();
         let rewards: number[] = []
         let totalSteps = 0;
         for (let episode = 0; episode < this.params.numberOfEpisodes; episode++) {
 
             // do training
             await new Promise((resolve) => {
-                agent.reset();
+                agent.episodeReset();
                 let step = 0
 
                 const optimizer = tf.train.adam(this.params.learningRate);
 
                 const gameTicker = new Ticker();
+                gameTicker.maxFPS = 999;
                 gameTicker.add(() => {
 
                     totalSteps++;
@@ -65,12 +72,16 @@ export class DQL {
                         rewards.push(cummReward);
                         console.info(`Concluded episode ${episode} : reward = ${cummReward}`)
                         gameTicker.destroy();
+
+                        console.log(`moving average : ${d.add(cummReward)}`)
+
                         resolve('resolved');
                     }
                 })
                 gameTicker.start();
             })
         }
+        console.log(d.getAverages());
         return rewards;
     }
 

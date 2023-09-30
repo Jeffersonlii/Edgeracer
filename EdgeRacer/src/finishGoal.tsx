@@ -62,4 +62,11 @@ export class FinishGoal implements ControlInterface{
             x: this.finishGraphic.x + this.finishGraphic.width / 2,
             y: this.finishGraphic.y + this.finishGraphic.height / 2};
     }
+    getBounds(){
+        return {
+            ...this.getPosition(),
+            width: this.finishGraphic.width,
+            height: this.finishGraphic.height,
+        }
+    }
 }

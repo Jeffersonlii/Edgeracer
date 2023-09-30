@@ -29,7 +29,7 @@ export class ManualControl {
         // ----- set up current run ------
         this.addListeners();
         const carTicker = new Ticker();
-        carTicker.maxFPS = 999;
+        carTicker.maxFPS = 60;
         console.log("fps is " + carTicker.FPS);
 
         this.t = carTicker.add(() => {
@@ -45,9 +45,6 @@ export class ManualControl {
             }
             else if (keys.a) {
                 s = env.step(Action.LEFT_TURN)
-            }
-            else if (keys.s) {
-                s = env.step(Action.BREAK)
             }
             else if (keys.d) {
                 s = env.step(Action.RIGHT_TURN)

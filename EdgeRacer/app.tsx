@@ -14,7 +14,9 @@ function buildapp() {
     const appContainer = document.getElementById('canvas-space');
     if (!appContainer) return;
     const app = new Application<HTMLCanvasElement>({
-        resizeTo: appContainer,
+        // resizeTo: appContainer,
+        width: appContainer.clientWidth,
+        height: appContainer.clientHeight,
     });
 
     appContainer.appendChild(app.view);
@@ -42,17 +44,8 @@ function buildapp() {
 
     // add subs 
     (() => {
-        window.addEventListener('resize', (e) => {
-            let a = document.getElementById('canvas-space')
-            app.renderer.resize(a?.clientWidth as number, a?.clientHeight as number);
-
-            // recreate border walls when user resizes 
-            buildingComponent.destroyBorderWalls();
-            buildingComponent.createBorderWalls();
-        });
 
         document.getElementById('destroyButton')?.addEventListener('click', () => {
-
             // uncheck all control radio buttons
             let htmlcontrols = document.getElementsByName('controls');
             for (let i = 0; i < htmlcontrols.length; i++) {
@@ -70,27 +63,43 @@ function buildapp() {
         });
 
         document.getElementById('trainButton')?.addEventListener('click', async () => {
+            
             // add an Agent to begin training
 
             if (!(sgoalsComponent.exists() && fgoalsComponent.exists())) {
                 alert('Please Place a Start and Finish Position First!');
                 return;
             }
+
+            let htmlcontrols = document.getElementsByName('controls');
+            for (let i = 0; i < htmlcontrols.length; i++) {
+                (htmlcontrols[i] as HTMLInputElement).checked = false;
+                contrComponents.forEach(c=>c.setActive(false))
+            }
+
             // ManualControl.runLoop(env);
 
+            const numberOfEpisodes = 1000;
+            const maxStepCount = 1000;
+            const initialExplorationRate = 1;
+            const explorationDecayRatePerEpisode = 1 / numberOfEpisodes
+            const explorationDecayRatePerStep = 1 / maxStepCount
+            // const explorationDecayRatePerEpisode = 0
+
             let dql = new DQL({
-                replayBatchSize: 12,
-                targetSyncFrequency: 1000,
-                numberOfEpisodes: 100,
-                maxStepCount: 1000,
-                discountRate: 0.9,
-                learningRate: 0.7,
+                replayBatchSize: 1,
+                targetSyncFrequency : maxStepCount,
+                numberOfEpisodes,
+                maxStepCount,
+                discountRate: 0.95,
+                learningRate: 0.005,
             });
             let agent = new Agent(env, {
-                replayMemorySize: 40,
-                explorationRate: 1,
+                replayMemorySize: 1,
+                initialExplorationRate,
                 // explorationRate: 0.4,
-                explorationDecayRate: 0.00005,
+                explorationDecayRatePerStep,
+                explorationDecayRatePerEpisode,
                 minExplorationRate: 0.2,
             })
 
@@ -111,7 +120,7 @@ function buildapp() {
             console.log(animationTicker.FPS)
 
             const rewards = await dql.train(agent);
-            console.log(rewards)
+            // console.log(rewards)
         });
     })();
 }

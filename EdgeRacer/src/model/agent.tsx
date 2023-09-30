@@ -5,8 +5,9 @@ import { ReplayMemory } from "./replayMemory";
 
 export interface agentParameters {
     replayMemorySize: number;
-    explorationRate: number;
-    explorationDecayRate: number;
+    initialExplorationRate: number; 
+    explorationDecayRatePerStep: number;
+    explorationDecayRatePerEpisode: number
     minExplorationRate: number;
 }
 export class Agent {
@@ -17,19 +18,33 @@ export class Agent {
     curExploreRate: number;
     s: QState;
     replayMemories: ReplayMemory;
+    numEpsTrained : number = 0; // number of episodes trained using this agent
     constructor(env: GameEnvironment, params: agentParameters) {
         this.env = env;
         this.params = params;
-        this.curExploreRate = params.explorationRate;
+        this.curExploreRate = params.initialExplorationRate;
         this.s = env.reset();
         this.replayMemories = new ReplayMemory(this.params.replayMemorySize);
     }
 
-    reset() {
+    // totally reset agent  
+    totallyReset() {
         this.rewardCount = 0;
-        //todo reduce epsilon on episode
-        // this.curExploreRate = this.params.explorationRate;
+        this.curExploreRate = this.params.initialExplorationRate;
         this.s = this.env.reset();
+        this.replayMemories.clear()
+        this.numEpsTrained = 0; 
+    }
+
+    // partially reset agent for training on new episode
+    episodeReset() {
+        this.numEpsTrained += 1; 
+        this.rewardCount = 0;
+        this.curExploreRate = 
+            this.params.initialExplorationRate - 
+            this.numEpsTrained * this.params.explorationDecayRatePerEpisode;
+        this.s = this.env.reset();
+        console.log(`explore start : ${this.curExploreRate}`)
         this.replayMemories.clear()
     }
 
@@ -54,7 +69,7 @@ export class Agent {
         this.s = sPrime;
         this.curExploreRate = Math.max(
             this.params.minExplorationRate,
-            this.curExploreRate - this.params.explorationDecayRate);
+            this.curExploreRate - this.params.explorationDecayRatePerStep);
 
         if (terminated) {
             console.log(this.curExploreRate)
