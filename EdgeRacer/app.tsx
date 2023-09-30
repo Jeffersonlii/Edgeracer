@@ -87,7 +87,7 @@ function buildapp() {
             // const explorationDecayRatePerEpisode = 0
 
             let dql = new DQL({
-                replayBatchSize: 1,
+                replayBatchSize: 16,
                 targetSyncFrequency : maxStepCount,
                 numberOfEpisodes,
                 maxStepCount,
@@ -95,7 +95,7 @@ function buildapp() {
                 learningRate: 0.005,
             });
             let agent = new Agent(env, {
-                replayMemorySize: 1,
+                replayMemorySize: 50,
                 initialExplorationRate,
                 // explorationRate: 0.4,
                 explorationDecayRatePerStep,

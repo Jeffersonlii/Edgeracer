@@ -53,16 +53,16 @@ export class DQL {
                 const gameTicker = new Ticker();
                 gameTicker.maxFPS = 999;
                 gameTicker.add(() => {
-
                     totalSteps++;
                     step++;
-
                     // ---- progress game by taking action ------
                     // this also stores the experience into replay memory
                     let { cummReward, terminated } = agent.playStep(this.policyNetwork)
 
                     // ---- train on batch ------ 
-                    this.optimizeOnReplayBatch(agent.getMemory(), optimizer);
+                    if(agent.getMemory().storage.length === agent.getReplayMemorySize()){
+                        this.optimizeOnReplayBatch(agent.getMemory(), optimizer);
+                    }
 
                     // ----- sync networks ------
                     if (totalSteps % this.params.targetSyncFrequency === 0) {
@@ -88,12 +88,13 @@ export class DQL {
     private optimizeOnReplayBatch(replayMemories: ReplayMemory, optimizer: tf.Optimizer) {
         // randomly sample a batch to train on
         const batch = replayMemories.sample(this.params.replayBatchSize);
+
         // compute the loss of the batch 
         // ( (R_t+1 + gamma*max[q`(s`, a`)]) - q(s,a) )^2
         const lossFunc = () => tf.tidy(() => {
+
             const stateTensor = tf.stack(batch.map((mem) => mem.sTensor));
             const actionTensor = tf.tensor1d(batch.map((mem) => mem.a), 'int32');
-
             const allQs = this.policyNetwork.apply(stateTensor, { training: false }) as tf.Tensor
             const oneHotAction = tf.oneHot(actionTensor, ACTION_SIZE);
             const qs = allQs.mul(oneHotAction).sum(1);
@@ -105,11 +106,13 @@ export class DQL {
             const doneMask = tf.scalar(1).sub(batch.map((m) => m.terminated))
 
             const targetQs = rewardTensor.add(gamma.mul(doneMask).mul(nextMaxQTensor))
-
             return tf.losses.meanSquaredError(targetQs, qs) as tf.Scalar;
         })
+
         const grads = tf.variableGrads(lossFunc);
+
         optimizer.applyGradients(grads.grads)
+
         tf.dispose(grads);
     }
     // ------ pure function -------

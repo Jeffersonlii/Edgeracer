@@ -147,7 +147,7 @@ export class GameEnvironment {
 
         let reward = -5;
         reward += statePrime.velocity*5;
-
+        reward += reward * (Math.min(this.initialDeltaToGoal - statePrime.goalDelta),1)
 
         return { reward : reward, isTerminal: false };
     }
