@@ -9,24 +9,32 @@
 
 <body>
   <div id="charts">
-    <canvas id="100movingAvg"\>
+    <canvas id="100movingAvg" \>
   </div>
-  <div id="controls">
-    <div>
-      <input type="radio" id="buildWall" name="controls" value="buildWall">
-      <label for="buildWall">Build Wall</label>
-    </div>
-    <div>
-      <input type="radio" id="eraseWall" name="controls" value="eraseWall">
-      <label for="eraseWall">Erase Wall</label>
-    </div>
-    <div>
-      <input type="radio" id="addStartLine" name="controls" value="addStartLine">
-      <label for="addStartLine">Add Start Line</label>
-    </div>
-    <div>
-      <input type="radio" id="addFinishLine" name="controls" value="addFinishLine">
-      <label for="addFinishLine">Add Finish Line</label>
+  <div id="header">
+    <select name="cars" id="cars">
+      <option value="volvo">Volvo</option>
+      <option value="saab">Saab</option>
+      <option value="mercedes">Mercedes</option>
+      <option value="audi">Audi</option>
+    </select>
+    <div id="controls" >
+      <div>
+        <input type="radio" id="buildWall" name="controls" value="buildWall">
+        <label for="buildWall">Build Wall</label>
+      </div>
+      <div>
+        <input type="radio" id="eraseWall" name="controls" value="eraseWall">
+        <label for="eraseWall">Erase Wall</label>
+      </div>
+      <div>
+        <input type="radio" id="addStartLine" name="controls" value="addStartLine">
+        <label for="addStartLine">Add Start Line</label>
+      </div>
+      <div>
+        <input type="radio" id="addFinishLine" name="controls" value="addFinishLine">
+        <label for="addFinishLine">Add Finish Line</label>
+      </div>
     </div>
     <button id="trainButton">Train!</button>
     <button id="destroyButton">Clear</button>

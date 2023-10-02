@@ -17,7 +17,10 @@ function buildapp() {
         // resizeTo: appContainer,
         width: appContainer.clientWidth,
         height: appContainer.clientHeight,
+        sharedTicker : true
     });
+    app.ticker.maxFPS = 10
+    console.log(`FPS : ${app.ticker.FPS}`)
 
     appContainer.appendChild(app.view);
 
@@ -42,9 +45,11 @@ function buildapp() {
     // create borders
     buildingComponent.createBorderWalls();
 
-    //
+    // charting stuff
     let movingAvgChart: Chart<"line", number[], number>;
-    let addMAvgToChart: (input: { avg: number; episode: number; }) => any; ;
+    let addMAvgToChart: (input: { avg: number; episode: number; }) => any;
+    let emptyChart: () => any;
+
     // add subs 
     (() => {
 
@@ -90,6 +95,14 @@ function buildapp() {
                 });
                 movingAvgChart.update();
             }
+
+            emptyChart = () =>{
+                movingAvgChart.data.labels = [];
+                movingAvgChart.data.datasets.forEach((dataset: any) => {
+                    dataset.data = [];
+                });
+                movingAvgChart.update();
+            }
         });
 
         document.getElementById('destroyButton')?.addEventListener('click', () => {
@@ -104,6 +117,12 @@ function buildapp() {
 
             // destroy game environment
             env.destroy();
+
+            // reset chart
+            emptyChart();
+
+            // cap fps when not training
+            app.ticker.maxFPS = 10
 
             // rebuild border walls
             buildingComponent.createBorderWalls();
@@ -123,6 +142,8 @@ function buildapp() {
                 (htmlcontrols[i] as HTMLInputElement).checked = false;
                 contrComponents.forEach(c=>c.setActive(false))
             }
+
+            app.ticker.maxFPS = 60
 
             // ManualControl.runLoop(env);
 

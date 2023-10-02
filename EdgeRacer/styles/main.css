@@ -19,10 +19,15 @@ body {
 
 }
 
+#header{
+    display: flex;
+    padding: 1rem;
+}
 #controls {
     margin: 1rem;
     display: flex;
     justify-content: space-evenly;
+    width: 100%;
 }
 
 #charts {
