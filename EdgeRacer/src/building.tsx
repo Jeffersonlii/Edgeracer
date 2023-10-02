@@ -148,5 +148,11 @@ export class Building implements ControlInterface {
             .filter(child => child.name === wallname ||
                 child.name === borderWallName ) as Graphics[];
     }
+
+    createMap(map: WallCoordinate[]){
+        map.forEach((wall : WallCoordinate)=>{
+            this.buildWall(wall.startPos, wall.endPos, wallname)
+        })
+    }
 }
 

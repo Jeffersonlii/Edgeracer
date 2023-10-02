@@ -10,6 +10,7 @@ import { DQL } from './src/model/DQL';
 import { Agent } from './src/model/agent';
 import { Car } from './src/game/car'
 import Chart from 'chart.js/auto'
+import { CourseSelect } from './src/courseSelect';
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
     if (!appContainer) return;
@@ -24,10 +25,14 @@ function buildapp() {
 
     appContainer.appendChild(app.view);
 
+
     //load in control components 
     const buildingComponent = new Building(app);
     const sgoalsComponent = new StartingGoal(app);
     const fgoalsComponent = new FinishGoal(app);
+
+        // load in courses
+    const courseComponent = new CourseSelect(buildingComponent);
 
     const contrComponents: ControlInterface[] = [
         buildingComponent,

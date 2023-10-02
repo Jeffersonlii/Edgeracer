@@ -21,13 +21,19 @@ body {
 
 #header{
     display: flex;
-    padding: 1rem;
+    padding: 1rem;   
 }
+#header > *:not(:last-child) {
+    margin-right: 1rem;
+}
+
 #controls {
-    margin: 1rem;
     display: flex;
     justify-content: space-evenly;
     width: 100%;
+}
+#controls.hidden *{
+    display: none;
 }
 
 #charts {
