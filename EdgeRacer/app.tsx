@@ -48,10 +48,7 @@ function buildapp() {
     // add subs 
     (() => {
 
-        document.addEventListener('DOMContentLoaded', function() {
-
-            let data: {avg: number, episode: number}[] = [] 
-        
+        document.addEventListener('DOMContentLoaded', function() {        
             movingAvgChart = new Chart(
                 document.getElementById('100movingAvg') as HTMLCanvasElement,
                 {
@@ -64,6 +61,22 @@ function buildapp() {
                         data: []
                       }
                     ]
+                  },
+                  options:{
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Episode'
+                              }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Reward'
+                              }
+                        }
+                    }
                   }
                 }
               );
