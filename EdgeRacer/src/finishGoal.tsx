@@ -22,7 +22,8 @@ const style = new TextStyle({
 
 export class FinishGoal implements ControlInterface{
     private app: Application<HTMLCanvasElement>;
-    finishGraphic: Text;
+    private finishGraphic: Text;
+    private goalPosition: Position | undefined;
 
     constructor(app : Application<HTMLCanvasElement>) {
         this.app = app;
@@ -33,11 +34,9 @@ export class FinishGoal implements ControlInterface{
 
     private handleMc = (event: any) => {
         const { offsetX, offsetY } = event;
-
-        this.finishGraphic.x = offsetX - this.finishGraphic.width / 2;
-        this.finishGraphic.y = offsetY - this.finishGraphic.height / 2;
-
-        this.app.stage.addChild(this.finishGraphic);
+        const pos = {x:offsetX, y:offsetY};
+        this.goalPosition = pos;
+        this.updateGraphic(pos);
     }
 
     setActive(isActive: boolean) {
@@ -57,16 +56,25 @@ export class FinishGoal implements ControlInterface{
         return !! this.app.stage.getChildByName('finish');
     }
 
-    getPosition() : Position{
-        return {
-            x: this.finishGraphic.x + this.finishGraphic.width / 2,
-            y: this.finishGraphic.y + this.finishGraphic.height / 2};
+    getPosition() : Position | undefined {
+        return this.goalPosition;
     }
+
     getBounds(){
         return {
-            ...this.getPosition(),
+            x: this.finishGraphic.x,
+            y: this.finishGraphic.y,
             width: this.finishGraphic.width,
             height: this.finishGraphic.height,
         }
+    }
+    private updateGraphic(pos: Position){
+        this.finishGraphic.x = pos.x - this.finishGraphic.width / 2;
+        this.finishGraphic.y = pos.y - this.finishGraphic.height / 2;
+        this.app.stage.addChild(this.finishGraphic);
+    }
+    setPosition(position: Position){
+        this.goalPosition = position;
+        this.updateGraphic(position);
     }
 }

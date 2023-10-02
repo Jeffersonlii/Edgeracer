@@ -32,7 +32,10 @@ function buildapp() {
     const fgoalsComponent = new FinishGoal(app);
 
         // load in courses
-    const courseComponent = new CourseSelect(buildingComponent);
+    const courseComponent = new CourseSelect(
+        buildingComponent,
+        sgoalsComponent,
+        fgoalsComponent);
 
     const contrComponents: ControlInterface[] = [
         buildingComponent,
@@ -149,6 +152,10 @@ function buildapp() {
             }
 
             app.ticker.maxFPS = 60
+
+            console.log(buildingComponent.getAllWallPos())
+            console.log(sgoalsComponent.getPosition())
+            console.log(fgoalsComponent.getPosition())
 
             // ManualControl.runLoop(env);
 

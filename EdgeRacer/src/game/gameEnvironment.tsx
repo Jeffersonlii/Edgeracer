@@ -37,21 +37,25 @@ export class GameEnvironment {
     // reset the environment, initialize all global variables like the walls and game state
     // create the car assets 
     reset(): QState {
+
+
         // get all wall lines to calculate collisions against
         this.wallsCords = this.bc.getAllWallPos();
-        let startingPosition = this.sgc.getPosition();
+        let startingPosition = this.sgc.getPosition() ?? {x:0, y:0};
+        let finishPosition = this.fgc.getPosition() ?? {x:0, y:0};
+
 
         // init current state
-        this.initialDeltaToGoal = calcDist(startingPosition, this.fgc.getPosition());
+        this.initialDeltaToGoal = calcDist(startingPosition, finishPosition);
         this.currentState = {
             ...this.getWallDeltasToAgent(startingPosition, 0, this.wallsCords),
             goalDelta: this.initialDeltaToGoal,
             position: startingPosition,
             angle: 0,
-            angleToGoal: angleBetween(startingPosition, this.fgc.getPosition()),
+            angleToGoal: angleBetween(startingPosition, finishPosition),
             velocity: 0,
             turningRate: 0,
-            goalPosition: this.fgc.getPosition()
+            goalPosition: finishPosition
         }
         return this.normalizeQState(this.currentState);
     }
@@ -85,7 +89,7 @@ export class GameEnvironment {
             velocity);
 
         // ----- update to new state, s prime -----
-        let angleToGoal = angleBetween(resultantPos, this.fgc.getPosition()) - angle;
+        let angleToGoal = angleBetween(resultantPos, this.fgc.getPosition() ?? {x:0, y:0}) - angle;
         angleToGoal = (angleToGoal < 0 ? angleToGoal + 360 : 0) 
         this.currentState = {
             ...this.currentState,
