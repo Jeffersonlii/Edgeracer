@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tensorflow/tfjs": "^4.7.0",
+    "chart.js": "^4.4.0",
     "pixi.js": "^7.2.4"
   }
 }

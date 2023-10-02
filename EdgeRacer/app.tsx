@@ -9,7 +9,7 @@ import { ManualControl } from './src/game/manualControl';
 import { DQL } from './src/model/DQL';
 import { Agent } from './src/model/agent';
 import { Car } from './src/game/car'
-
+import Chart from 'chart.js/auto'
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
     if (!appContainer) return;
@@ -42,8 +42,42 @@ function buildapp() {
     // create borders
     buildingComponent.createBorderWalls();
 
+    //
+    let movingAvgChart: Chart<"line", number[], number>;
+    let addMAvgToChart: (input: { avg: number; episode: number; }) => any; ;
     // add subs 
     (() => {
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            let data: {avg: number, episode: number}[] = [] 
+        
+            movingAvgChart = new Chart(
+                document.getElementById('100movingAvg') as HTMLCanvasElement,
+                {
+                  type: 'line',
+                  data: {
+                    labels: [],
+                    datasets: [
+                      {
+                        label: '100-episode Moving Average',
+                        data: []
+                      }
+                    ]
+                  }
+                }
+              );
+        
+            // Function to add random data point
+            addMAvgToChart = (input : {avg:number, episode:number}) => {
+
+                movingAvgChart.data.labels?.push(input.episode);
+                movingAvgChart.data.datasets.forEach((dataset: any) => {
+                    dataset.data.push(input.avg);
+                });
+                movingAvgChart.update();
+            }
+        });
 
         document.getElementById('destroyButton')?.addEventListener('click', () => {
             // uncheck all control radio buttons
@@ -82,7 +116,7 @@ function buildapp() {
             const numberOfEpisodes = 1000;
             const maxStepCount = 1000;
             const initialExplorationRate = 1;
-            const explorationDecayRatePerEpisode = 1 / numberOfEpisodes
+            const explorationDecayRatePerEpisode = 0.5 / numberOfEpisodes
             const explorationDecayRatePerStep = 1 / maxStepCount
             // const explorationDecayRatePerEpisode = 0
 
@@ -100,7 +134,7 @@ function buildapp() {
                 // explorationRate: 0.4,
                 explorationDecayRatePerStep,
                 explorationDecayRatePerEpisode,
-                minExplorationRate: 0.2,
+                minExplorationRate: 0.3,
             })
 
             // add car to scene and set up graphics loop
@@ -119,7 +153,7 @@ function buildapp() {
             animationTicker.start();
             console.log(animationTicker.FPS)
 
-            const rewards = await dql.train(agent);
+            const rewards = await dql.train(agent, addMAvgToChart);
             // console.log(rewards)
         });
     })();

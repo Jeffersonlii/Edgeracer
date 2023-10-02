@@ -86,12 +86,12 @@ export class GameEnvironment {
 
         // ----- update to new state, s prime -----
         let angleToGoal = angleBetween(resultantPos, this.fgc.getPosition()) - angle;
-        angleToGoal = angleToGoal < 0 ? angleToGoal + 360 : 0
+        angleToGoal = (angleToGoal < 0 ? angleToGoal + 360 : 0) 
         this.currentState = {
             ...this.currentState,
             ...this.getWallDeltasToAgent(resultantPos, angle, this.wallsCords),
             angle,
-            angleToGoal: angleBetween(resultantPos, this.fgc.getPosition()) - angle,
+            angleToGoal: angleToGoal,
             goalDelta: calcDist(resultantPos, this.currentState.goalPosition),
             position: resultantPos,
             velocity: velocity,

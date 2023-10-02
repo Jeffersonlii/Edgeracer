@@ -33,7 +33,7 @@ export class DQL {
         this.params = params;
     }
 
-    async train(agent: Agent) {
+    async train(agent: Agent, calledWithMovingAverage: (input : {avg:number, episode:number}) => any ) {
 
         const d = new Data();
         d.reset();
@@ -73,7 +73,9 @@ export class DQL {
                         console.info(`Concluded episode ${episode} : reward = ${cummReward}`)
                         gameTicker.destroy();
 
-                        console.log(`moving average : ${d.add(cummReward)}`)
+                        let mavg = d.add(cummReward);
+                        console.log(`moving average : ${mavg}`)
+                        calledWithMovingAverage({avg: mavg, episode})
 
                         resolve('resolved');
                     }

@@ -24,3 +24,10 @@ body {
     display: flex;
     justify-content: space-evenly;
 }
+
+#charts {
+    position: absolute;
+    width: 30%;
+    bottom: 5rem;
+    right: 5rem;
+}
