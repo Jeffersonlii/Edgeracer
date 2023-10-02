@@ -57,6 +57,7 @@ function buildapp() {
     let movingAvgChart: Chart<"line", number[], number>;
     let addMAvgToChart: (input: { avg: number; episode: number; }) => any;
     let emptyChart: () => any;
+    const chartsElement = document.getElementById('charts') as HTMLDivElement;
 
     // add subs 
     (() => {
@@ -128,6 +129,7 @@ function buildapp() {
 
             // reset chart
             emptyChart();
+            chartsElement.classList.add('hidden');            
 
             // cap fps when not training
             app.ticker.maxFPS = 10
@@ -152,6 +154,7 @@ function buildapp() {
             }
 
             app.ticker.maxFPS = 60
+            chartsElement.classList.remove('hidden');            
 
             console.log(buildingComponent.getAllWallPos())
             console.log(sgoalsComponent.getPosition())
@@ -171,7 +174,7 @@ function buildapp() {
                 targetSyncFrequency : maxStepCount,
                 numberOfEpisodes,
                 maxStepCount,
-                discountRate: 0.95,
+                discountRate: 0.8,
                 learningRate: 0.005,
             });
             let agent = new Agent(env, {

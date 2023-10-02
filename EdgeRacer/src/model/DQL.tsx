@@ -97,7 +97,7 @@ export class DQL {
 
             const stateTensor = tf.stack(batch.map((mem) => mem.sTensor));
             const actionTensor = tf.tensor1d(batch.map((mem) => mem.a), 'int32');
-            const allQs = this.policyNetwork.apply(stateTensor, { training: false }) as tf.Tensor
+            const allQs = this.policyNetwork.apply(stateTensor, { training: true }) as tf.Tensor
             const oneHotAction = tf.oneHot(actionTensor, ACTION_SIZE);
             const qs = allQs.mul(oneHotAction).sum(1);
 

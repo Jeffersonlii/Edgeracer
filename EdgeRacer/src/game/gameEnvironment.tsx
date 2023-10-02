@@ -7,7 +7,7 @@ import { FinishGoal } from "../finishGoal";
 // ------- Car Drivability Metrics --------
 export const carWidth = 30;
 export const carHeight = 10;
-const maxEyeDist = 100;
+const maxEyeDist = 500;
 const topVelo = 10;
 const topAcceleration = 0.1;
 const passiveBreaking = 0.1;
@@ -130,30 +130,51 @@ export class GameEnvironment {
             throw new Error('Please Call env.reset() to instantiated game');
         }
 
-        // ------- terminals -------
-        // todo : plenty of room for optimization! 
-        // walls can be preprossed to be sorted into hashtables based of collision sectors
-        // check for collision
-        let collided = this.isCollidingWithWall(this.bc.getAllWallPos(), statePrime.position)
-        if (collided) {
-            console.info("collided!!", this.currentState)
+        // // ------- terminals -------
+        // // todo : plenty of room for optimization! 
+        // // walls can be preprossed to be sorted into hashtables based of collision sectors
+        // // check for collision
+        // let collided = this.isCollidingWithWall(this.bc.getAllWallPos(), statePrime.position)
+        // if (collided) {
+        //     console.info("collided!!", this.currentState)
 
-            // -500000 reward for collisions! 
-            return { reward: -5, isTerminal: true }
+        //     return { reward: -1000, isTerminal: true }
+        // }
+
+        // // if goal has been reached, reward 100000! 
+        // if (this.positionIsWithinCar(statePrime.goalPosition, statePrime.position)) {
+        //     console.info("goal Reached!", this.currentState)
+
+        //     return { reward: 1000, isTerminal: true }
+        // }
+
+        // // let reward = -5;
+        // // reward += statePrime.velocity*5;
+        // // reward += reward * (Math.min(this.initialDeltaToGoal - statePrime.goalDelta),1)
+
+        // return { reward : 1, isTerminal: false };
+
+        let reward = 0;
+        let isTerminal = false;
+    
+        // Completing the race
+        if (statePrime.goalDelta < 10) {
+            reward += 500;
+            isTerminal = true;
         }
-
-        // if goal has been reached, reward 100000! 
-        if (this.positionIsWithinCar(statePrime.goalPosition, statePrime.position)) {
-            console.info("goal Reached!", this.currentState)
-
-            return { reward: 30000, isTerminal: true }
+    
+        // Avoiding collisions
+        if (statePrime.frontDelta < 30 || statePrime.leftfrontDelta < 30 || statePrime.rightfrontDelta < 30) {
+            reward -= 500;
+            isTerminal = true;
+        }else{
+            reward -= 1;
         }
-
-        let reward = -5;
-        reward += statePrime.velocity*5;
-        reward += reward * (Math.min(this.initialDeltaToGoal - statePrime.goalDelta),1)
-
-        return { reward : reward, isTerminal: false };
+    
+        // Efficient driving
+        reward += statePrime.velocity;
+    
+        return { reward, isTerminal };
     }
     // return the new velocity, angle and turning rate of the car 
     // after the action has been applied on the parameters
@@ -282,47 +303,6 @@ export class GameEnvironment {
             y: initialPosition.y + deltaY
         }
     }
-
-    // Return if any walls represented by wallCoords collides with dobj
-    // collision is detected by if any of the 4 borders of dobj intersect with any wall line
-    private isCollidingWithWall(
-        wallCoords: WallCoordinate[],
-        carPos: Position): boolean {
-        let topLeft = { x: carPos.x, y: carPos.y };
-        let topRight = { x: carPos.x + carWidth, y: carPos.y };
-        let bottomLeft = { x: carPos.x, y: carPos.y + carHeight };
-        let bottomRight = { x: carPos.x + carWidth, y: carPos.y + carHeight };
-
-        return wallCoords.some(({ startPos, endPos }) => {
-            return intersectionOfSegments(  // top border of container
-                topLeft, topRight,
-                startPos, endPos) ||
-                intersectionOfSegments(  // right border of container
-                    topRight, bottomRight,
-                    startPos, endPos) ||
-                intersectionOfSegments(  // bottom border of container
-                    bottomRight, bottomLeft,
-                    startPos, endPos) ||
-                intersectionOfSegments(  // left border of container
-                    bottomLeft, topLeft,
-                    startPos, endPos)
-        })
-    }
-
-    // if position is within the bounds of the displayobject
-    private positionIsWithinCar(pos: Position, carPos: Position) {
-        // Get the global bounds of the displayObject
-        let { x, y } = pos;
-
-        // Check if the point {x, y} is within the bounds
-        return (
-            x >= carPos.x &&
-            x <= carPos.x + carWidth &&
-            y >= carPos.y &&
-            y <= carPos.y + carHeight
-        );
-    }
-
     private normalizeQState(s: EnvState): QState {
         return {
             frontDelta: s.frontDelta / maxEyeDist,

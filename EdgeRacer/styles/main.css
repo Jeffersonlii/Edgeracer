@@ -42,3 +42,6 @@ body {
     bottom: 5rem;
     left: 5rem;
 }
+#charts.hidden{
+    display: none;
+}

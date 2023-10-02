@@ -44,7 +44,7 @@ export class Agent {
             this.params.initialExplorationRate - 
             this.numEpsTrained * this.params.explorationDecayRatePerEpisode;
         this.s = this.env.reset();
-        console.log(`explore start : ${this.curExploreRate}`)
+        console.log(`explore start rate: ${this.curExploreRate}`)
         this.replayMemories.clear()
     }
 
@@ -72,7 +72,7 @@ export class Agent {
             this.curExploreRate - this.params.explorationDecayRatePerStep);
 
         if (terminated) {
-            console.log(this.curExploreRate)
+            console.log(`explore end rate: ${this.curExploreRate}`)
         }
         return { cummReward: this.rewardCount, terminated }
     }
