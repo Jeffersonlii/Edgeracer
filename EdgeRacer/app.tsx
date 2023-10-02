@@ -62,7 +62,8 @@ function buildapp() {
     // add subs 
     (() => {
 
-        document.addEventListener('DOMContentLoaded', function() {        
+        document.addEventListener('DOMContentLoaded', function() {  
+            
             movingAvgChart = new Chart(
                 document.getElementById('100movingAvg') as HTMLCanvasElement,
                 {
@@ -77,6 +78,15 @@ function buildapp() {
                     ]
                   },
                   options:{
+                    // parsing: false,
+                    animation: false,
+                    plugins: {
+                        decimation: {
+                            enabled: true,
+                            algorithm: 'lttb',
+                            samples: 10,
+                          },
+                      },
                     scales: {
                         x: {
                             title: {
