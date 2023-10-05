@@ -1,4 +1,4 @@
-EdgeRacer/.cache/
-EdgeRacer/node_modules/
-EdgeRacer/dist/
-EdgeRacer/.parcel-cache/
+.cache/
+node_modules/
+dist/
+.parcel-cache/
