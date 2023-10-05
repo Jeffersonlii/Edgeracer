@@ -11,6 +11,12 @@ import { Agent } from './src/model/agent';
 import { Car } from './src/game/car'
 import Chart from 'chart.js/auto'
 import { CourseSelect } from './src/courseSelect';
+
+// import and print tensorflow, hack for parcel bug 
+// https://github.com/parcel-bundler/parcel/issues/8792
+import * as tf from '@tensorflow/tfjs';
+console.log(tf)
+
 function buildapp() {
     const appContainer = document.getElementById('canvas-space');
     if (!appContainer) return;
