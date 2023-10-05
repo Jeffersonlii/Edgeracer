@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "serve": "parcel index.html"
+    "serve": "parcel index.html",
+    "build": "parcel build index.html --public-url ."
   },
   "devDependencies": {
     "buffer": "^6.0.3",
